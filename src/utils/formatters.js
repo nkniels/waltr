@@ -1,5 +1,5 @@
 /**
- * Utility formatters and validators
+ * Utilitaires de formatage et de validation
  */
 
 export function formatFCFA(amount) {
@@ -7,9 +7,9 @@ export function formatFCFA(amount) {
     return '0 FCFA';
   }
   const rounded = Math.round(Number(amount));
-  // Format with space as thousands separator
+  // Formatage avec espace comme séparateur de milliers
   const formatted = rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-  return `${formatted} FCFA`;
+  return formatted + ' FCFA';
 }
 
 export function validateArticleForm({ nom, prix, stock }) {

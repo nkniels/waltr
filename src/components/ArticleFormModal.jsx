@@ -90,7 +90,7 @@ export default function ArticleFormModal({
               {isEditing ? "Modifier l'article" : "Nouvel article"}
             </h2>
             <p className="text-xs text-neutral-400 mt-0.5">
-              {isEditing ? "Mettez à jour les champs du catalogue" : "Ajoutez un produit au catalogue WhatsApp"}
+              {isEditing ? "Mettez à jour les champs du catalogue" : "Ajoutez un vêtement au catalogue WhatsApp"}
             </p>
           </div>
           
@@ -118,11 +118,11 @@ export default function ArticleFormModal({
               onChange={(e) => handleChange('nom', e.target.value)}
               onBlur={() => handleBlur('nom')}
               placeholder="ex: Chemise en lin blanc"
-              className={`w-full px-3 py-2 text-sm rounded-lg border bg-white outline-hidden transition-colors ${
+              className={"w-full px-3 py-2 text-sm rounded-lg border bg-white outline-hidden transition-colors " + (
                 errors.nom && touched.nom
                   ? 'border-rose-300 focus:border-rose-500'
                   : 'border-neutral-200 focus:border-neutral-950'
-              }`}
+              )}
             />
             {errors.nom && touched.nom && (
               <p className="mt-1 text-xs text-rose-500 flex items-center gap-1">
@@ -154,11 +154,11 @@ export default function ArticleFormModal({
                 onChange={(e) => handleChange('prix', e.target.value)}
                 onBlur={() => handleBlur('prix')}
                 placeholder="15000"
-                className={`w-full px-3 py-2 pr-12 text-sm rounded-lg border bg-white outline-hidden font-mono transition-colors ${
+                className={"w-full px-3 py-2 pr-12 text-sm rounded-lg border bg-white outline-hidden font-mono transition-colors " + (
                   errors.prix && touched.prix
                     ? 'border-rose-300 focus:border-rose-500'
                     : 'border-neutral-200 focus:border-neutral-950'
-                }`}
+                )}
               />
               <span className="absolute inset-y-0 right-0 pr-3 flex items-center text-xs font-mono text-neutral-400 pointer-events-none">
                 FCFA
@@ -185,12 +185,12 @@ export default function ArticleFormModal({
               value={formData.stock}
               onChange={(e) => handleChange('stock', e.target.value)}
               onBlur={() => handleBlur('stock')}
-              placeholder="10 (0 = épuisé)"
-              className={`w-full px-3 py-2 text-sm rounded-lg border bg-white outline-hidden font-mono transition-colors ${
+              placeholder="10 (0 = Épuisé)"
+              className={"w-full px-3 py-2 text-sm rounded-lg border bg-white outline-hidden font-mono transition-colors " + (
                 errors.stock && touched.stock
                   ? 'border-rose-300 focus:border-rose-500'
                   : 'border-neutral-200 focus:border-neutral-950'
-              }`}
+              )}
             />
             {errors.stock && touched.stock ? (
               <p className="mt-1 text-xs text-rose-500 flex items-center gap-1">
@@ -199,7 +199,7 @@ export default function ArticleFormModal({
               </p>
             ) : (
               <p className="mt-1 text-[11px] text-neutral-400">
-                Définir 0 marquera l'article comme épuisé.
+                Définir 0 marquera l'article comme Épuisé.
               </p>
             )}
           </div>

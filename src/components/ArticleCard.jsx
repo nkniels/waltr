@@ -7,11 +7,11 @@ export default function ArticleCard({ article, onEdit, onDelete }) {
   const isLowStock = article.stock > 0 && article.stock <= 3;
 
   return (
-    <article className={`group relative bg-white rounded-xl border transition-all duration-150 flex flex-col justify-between overflow-hidden ${
+    <article className={"group relative bg-white rounded-xl border transition-all duration-150 flex flex-col justify-between overflow-hidden " + (
       isOutOfStock 
-        ? 'border-neutral-200/60 bg-neutral-50/30' 
-        : 'border-neutral-200/80 hover:border-neutral-300 hover:shadow-2xs'
-    }`}>
+        ? "border-neutral-200/60 bg-neutral-50/30" 
+        : "border-neutral-200/80 hover:border-neutral-300 hover:shadow-2xs"
+    )}>
       <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
         <div>
           {/* Header Row: ID + Stock status badge */}
@@ -21,8 +21,8 @@ export default function ArticleCard({ article, onEdit, onDelete }) {
             </span>
 
             {isOutOfStock ? (
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-neutral-100 text-neutral-600 border border-neutral-200">
-                <span className="w-1.5 h-1.5 rounded-full bg-neutral-400"></span>
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-rose-50 text-rose-700 border border-rose-200/60">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
                 Épuisé
               </span>
             ) : isLowStock ? (
@@ -31,7 +31,7 @@ export default function ArticleCard({ article, onEdit, onDelete }) {
                 {article.stock} restant{article.stock > 1 ? 's' : ''}
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium text-neutral-600">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium text-neutral-600 bg-neutral-50 border border-neutral-200/70">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                 {article.stock} en stock
               </span>
@@ -45,9 +45,9 @@ export default function ArticleCard({ article, onEdit, onDelete }) {
             </div>
 
             <div className="flex-1 min-w-0 pt-0.5">
-              <h3 className={`text-sm sm:text-base font-medium tracking-tight text-neutral-900 leading-snug line-clamp-2 ${
-                isOutOfStock ? 'text-neutral-500 line-through decoration-neutral-300' : ''
-              }`}>
+              <h3 className={"text-sm sm:text-base font-medium tracking-tight text-neutral-900 leading-snug line-clamp-2 " + (
+                isOutOfStock ? "text-neutral-500 line-through decoration-neutral-300" : ""
+              )}>
                 {article.nom}
               </h3>
 
