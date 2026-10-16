@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import WaltrMascot from './WaltrMascot';
 
 export default function EmptyState({ isSearching, searchQuery, onClearSearch, onOpenAddModal }) {
+  const [imgError, setImgError] = useState(false);
+
   if (isSearching) {
     return (
       <div className="py-14 px-4 text-center bg-white rounded-xl border border-neutral-200/80">
@@ -28,7 +30,18 @@ export default function EmptyState({ isSearching, searchQuery, onClearSearch, on
   return (
     <div className="py-12 px-4 text-center bg-white rounded-xl border border-neutral-200/80">
       <div className="mb-3 flex justify-center">
-        <WaltrMascot variant="catalog" size={96} />
+        {!imgError ? (
+          <div className="w-48 max-w-full aspect-[4/3] rounded-xl overflow-hidden flex items-center justify-center">
+            <img 
+              src="/illustrations/waltr-catalog.jpg" 
+              alt="waltr catalogue" 
+              onError={() => setImgError(true)}
+              className="w-full h-full object-contain select-none"
+            />
+          </div>
+        ) : (
+          <WaltrMascot variant="catalog" size={96} />
+        )}
       </div>
       <h3 className="text-sm font-bold text-neutral-950">
         Votre catalogue est vide

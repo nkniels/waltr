@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronRight, ChevronLeft, X, Sparkles, Check } from 'lucide-react';
+import { ChevronRight, ChevronLeft, X } from 'lucide-react';
 import WaltrMascot from './WaltrMascot';
 
 const ONBOARDING_STEPS = [
   {
     id: 'welcome',
-    variant: 'welcome',
+    image: '/illustrations/waltr-welcome.jpg',
+    fallbackVariant: 'welcome',
     badge: 'Bienvenue',
     title: 'Rencontrez waltr',
     subtitle: 'Votre copilote intelligent WhatsApp Commerce',
     description:
-      'waltr transforme votre boutique WhatsApp en machine de vente fluide. Gérez vos articles, suivez vos stocks et servez vos clients plus vite.',
+      'waltr transforme votre boutique WhatsApp en machine de vente fluide. Gérez vos articles, suivez vos stocks et servez vos clients sans friction.',
     bullets: [
       'Gestion simple pensée pour le commerce en Afrique',
       'Fonctionne immédiatement en Mode Démo ou avec votre API',
@@ -18,7 +19,8 @@ const ONBOARDING_STEPS = [
   },
   {
     id: 'catalog',
-    variant: 'catalog',
+    image: '/illustrations/waltr-catalog.jpg',
+    fallbackVariant: 'catalog',
     badge: 'Catalogue & Stocks',
     title: 'Gestion ultra-simple des articles',
     subtitle: 'Prix en FCFA & alertes de rupture automatiques',
@@ -31,7 +33,8 @@ const ONBOARDING_STEPS = [
   },
   {
     id: 'whatsapp',
-    variant: 'whatsapp',
+    image: '/illustrations/waltr-whatsapp.jpg',
+    fallbackVariant: 'whatsapp',
     badge: 'Automatisation',
     title: 'Connecté à vos conversations',
     subtitle: 'Vos clients commandent sans friction',
@@ -44,7 +47,8 @@ const ONBOARDING_STEPS = [
   },
   {
     id: 'launch',
-    variant: 'launch',
+    image: '/illustrations/waltr-launch.jpg',
+    fallbackVariant: 'launch',
     badge: 'Prêt à vendre',
     title: 'Vous avez le contrôle !',
     subtitle: 'Lancez votre premier article dès maintenant',
@@ -63,12 +67,18 @@ export default function OnboardingModal({
   onOpenAddModal
 }) {
   const [currentStep, setCurrentStep] = useState(0);
+  const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setCurrentStep(0);
+      setImgError(false);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [currentStep]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -160,16 +170,25 @@ export default function OnboardingModal({
           </button>
         </div>
 
-        {/* Mascot Illustration Area */}
-        <div className="pt-2 pb-1 flex justify-center items-center bg-gradient-to-b from-neutral-50/50 to-white">
-          <div className="transition-all duration-200 transform scale-100">
-            <WaltrMascot variant={step.variant} size={110} />
+        {/* Mascot High-Res Illustration Area */}
+        <div className="pt-2 pb-1 px-6 flex justify-center items-center bg-white">
+          <div className="relative w-full max-w-[260px] sm:max-w-[290px] aspect-[4/3] rounded-2xl overflow-hidden flex items-center justify-center">
+            {!imgError ? (
+              <img
+                src={step.image}
+                alt={step.title}
+                onError={() => setImgError(true)}
+                className="w-full h-full object-contain select-none"
+              />
+            ) : (
+              <WaltrMascot variant={step.fallbackVariant} size={110} />
+            )}
           </div>
         </div>
 
         {/* Content Area */}
-        <div className="px-6 py-4 text-center sm:text-left">
-          <div className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium tracking-tight bg-neutral-100 text-neutral-600 border border-neutral-200/70 mb-2">
+        <div className="px-6 py-3 text-center sm:text-left">
+          <div className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium tracking-tight bg-neutral-100 text-neutral-700 border border-neutral-200/70 mb-2">
             {step.badge}
           </div>
 
@@ -181,12 +200,12 @@ export default function OnboardingModal({
             {step.subtitle}
           </p>
 
-          <p className="mt-2.5 text-xs text-neutral-600 leading-relaxed max-w-md mx-auto sm:mx-0">
+          <p className="mt-2 text-xs text-neutral-600 leading-relaxed max-w-md mx-auto sm:mx-0">
             {step.description}
           </p>
 
           {/* Minimalist Feature Bullet list */}
-          <div className="mt-4 space-y-1.5 bg-neutral-50 border border-neutral-200/60 rounded-xl p-3 text-left">
+          <div className="mt-3.5 space-y-1.5 bg-neutral-50 border border-neutral-200/60 rounded-xl p-3 text-left">
             {step.bullets.map((b, idx) => (
               <div key={idx} className="flex items-center gap-2 text-xs text-neutral-700">
                 <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0"></span>
@@ -197,7 +216,7 @@ export default function OnboardingModal({
         </div>
 
         {/* Footer Navigation */}
-        <div className="px-6 py-4 bg-white border-t border-neutral-100 flex items-center justify-between gap-3">
+        <div className="px-6 py-3.5 bg-white border-t border-neutral-100 flex items-center justify-between gap-3">
           {/* Skip / Back button */}
           {currentStep > 0 ? (
             <button
