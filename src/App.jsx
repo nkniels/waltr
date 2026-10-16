@@ -3,11 +3,7 @@ import {
   Plus, 
   AlertCircle, 
   RefreshCw, 
-  Sparkles, 
-  Check, 
-  Layers, 
-  HelpCircle,
-  PackageX
+  Sparkles 
 } from 'lucide-react';
 import { api } from './api';
 import Header from './components/Header';
@@ -23,6 +19,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all'); // 'all' | 'in_stock' | 'out_of_stock'
 
   // Modals state
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -57,7 +54,7 @@ export default function App() {
     } catch (err) {
       console.error('Fetch error:', err);
       setErrorMessage(
-        err.message || "Erreur de connexion avec le serveur API. Vérifiez votre URL ou passez en Mode Démo."
+        err.message || "Erreur de connexion avec le serveur API."
       );
     } finally {
       setLoading(false);
@@ -73,7 +70,7 @@ export default function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchArticles(searchQuery);
-    }, 250);
+    }, 200);
     return () => clearTimeout(timer);
   }, [searchQuery, fetchArticles]);
 
@@ -82,21 +79,19 @@ export default function App() {
     setIsSubmitting(true);
     try {
       if (editingArticle) {
-        // Update existing article (PUT /api/articles/{id}/)
         const updated = await api.updateArticle(editingArticle.id, articleData);
         setArticles(prev => prev.map(item => item.id === editingArticle.id ? updated : item));
-        showToast(`Article "${updated.nom}" mis à jour avec succès !`, 'success');
+        showToast(`Article "${updated.nom}" mis à jour.`);
       } else {
-        // Create new article (POST /api/articles/)
         const created = await api.createArticle(articleData);
         setArticles(prev => [created, ...prev]);
-        showToast(`Article "${created.nom}" ajouté au catalogue !`, 'success');
+        showToast(`Article "${created.nom}" ajouté.`);
       }
       setIsFormOpen(false);
       setEditingArticle(null);
     } catch (err) {
       console.error('Save failed:', err);
-      showToast(err.message || "Erreur lors de l'enregistrement de l'article.", 'error');
+      showToast(err.message || "Erreur lors de l'enregistrement.", 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -108,7 +103,7 @@ export default function App() {
     try {
       await api.deleteArticle(id);
       setArticles(prev => prev.filter(item => item.id !== id));
-      showToast("L'article a été supprimé du catalogue.", 'success');
+      showToast("Article supprimé du catalogue.");
       setDeletingArticle(null);
     } catch (err) {
       console.error('Delete failed:', err);
@@ -118,34 +113,25 @@ export default function App() {
     }
   };
 
-  // Open Edit modal
   const handleOpenEdit = (article) => {
     setEditingArticle(article);
     setIsFormOpen(true);
   };
 
-  // Open Add modal
   const handleOpenAdd = () => {
     setEditingArticle(null);
     setIsFormOpen(true);
   };
 
-  // Save Credentials / Switch Mode
   const handleSaveCredentials = (newToken, newUrl, useMock) => {
     api.setCredentials(newToken, newUrl, useMock);
     setToken(newToken);
     setApiUrl(newUrl);
     setIsMockMode(api.isInMockMode());
-    showToast(
-      useMock 
-        ? "Mode Démo activé (données locales simulées)" 
-        : "Configuration API mise à jour !",
-      'success'
-    );
+    showToast(useMock ? "Mode Démo activé" : "Configuration API enregistrée");
     fetchArticles();
   };
 
-  // Logout
   const handleLogout = () => {
     api.logout();
     setToken('');
@@ -154,15 +140,21 @@ export default function App() {
     fetchArticles();
   };
 
-  // Reset Mock
   const handleResetMock = () => {
     const defaults = api.resetMockData();
     setArticles(defaults);
-    showToast("Articles du mock réinitialisés !", 'success');
+    showToast("Données réinitialisées.");
   };
 
+  // Filter articles based on active filter
+  const displayedArticles = articles.filter(article => {
+    if (filterStatus === 'in_stock') return article.stock > 0;
+    if (filterStatus === 'out_of_stock') return article.stock === 0;
+    return true;
+  });
+
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-['Plus_Jakarta_Sans',sans-serif] text-slate-800">
+    <div className="min-h-screen bg-[#fafafa] flex flex-col font-['Inter',-apple-system,sans-serif] text-neutral-900">
       {/* Toast Notification */}
       <Toast toast={toast} onClose={() => setToast(null)} />
 
@@ -179,94 +171,89 @@ export default function App() {
         onRefresh={() => fetchArticles()}
         loading={loading}
         onLogout={handleLogout}
+        filterStatus={filterStatus}
+        onFilterChange={setFilterStatus}
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-4 sm:py-6 pb-24">
-        {/* Error Alert Banner */}
+      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-6 pb-24">
+        {/* Understated Error Alert */}
         {errorMessage && (
-          <div className="mb-5 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 shadow-2xs animate-fade-in flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
-                <AlertCircle className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-rose-950 uppercase tracking-wide">
-                  Erreur de connexion API
-                </h4>
-                <p className="text-xs text-rose-700 mt-0.5 leading-relaxed">
-                  {errorMessage}
-                </p>
-              </div>
+          <div className="mb-5 p-3.5 rounded-xl bg-white border border-neutral-200 text-neutral-800 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0"></span>
+              <span className="text-neutral-600">{errorMessage}</span>
             </div>
 
             <div className="flex items-center gap-2 self-end sm:self-auto">
               <button
                 onClick={() => fetchArticles()}
-                className="px-3 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-800 font-semibold text-xs rounded-xl transition-colors cursor-pointer"
+                className="px-2.5 py-1 text-neutral-700 hover:text-neutral-950 font-medium hover:bg-neutral-100 rounded-md transition-colors cursor-pointer"
               >
                 Réessayer
               </button>
               <button
                 onClick={() => handleSaveCredentials('', apiUrl, true)}
-                className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs rounded-xl transition-colors cursor-pointer flex items-center gap-1"
+                className="px-2.5 py-1 bg-neutral-900 text-white rounded-md font-medium transition-colors cursor-pointer"
               >
-                <Sparkles className="w-3.5 h-3.5" />
-                Passer en Mode Démo
+                Mode Démo
               </button>
             </div>
           </div>
         )}
 
-        {/* Section title & count */}
+        {/* Catalog Section Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <h2 className="text-base sm:text-lg font-bold text-slate-900">
-              {searchQuery ? `Résultats de recherche (${articles.length})` : 'Articles du catalogue'}
+            <h2 className="text-sm font-semibold tracking-tight text-neutral-950">
+              {searchQuery ? `Recherche "${searchQuery}"` : 'Articles'}
             </h2>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-600">
-              {articles.length} {articles.length > 1 ? 'articles' : 'article'}
+            <span className="text-[11px] font-mono text-neutral-400">
+              ({displayedArticles.length})
             </span>
           </div>
 
-          <div className="text-xs text-slate-400 hidden sm:block">
-            {isMockMode ? 'Mise à jour immédiate (Mock)' : 'Synchronisé avec WhatsApp Commerce'}
-          </div>
+          <span className="text-[11px] text-neutral-400 font-mono">
+            WhatsApp Commerce
+          </span>
         </div>
 
         {/* Loading Skeletons */}
         {loading && articles.length === 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {[1, 2, 3, 4].map(idx => (
-              <div key={idx} className="bg-white rounded-2xl p-5 border border-slate-200/70 animate-pulse space-y-4">
-                <div className="flex gap-4">
-                  <div className="w-20 h-20 bg-slate-200 rounded-xl"></div>
+              <div key={idx} className="bg-white rounded-xl p-4 border border-neutral-200/70 animate-pulse space-y-3">
+                <div className="flex gap-3">
+                  <div className="w-14 h-14 bg-neutral-100 rounded-lg"></div>
                   <div className="flex-1 space-y-2 py-1">
-                    <div className="h-4 bg-slate-200 rounded-md w-3/4"></div>
-                    <div className="h-5 bg-slate-200 rounded-md w-1/2"></div>
+                    <div className="h-3.5 bg-neutral-100 rounded w-3/4"></div>
+                    <div className="h-4 bg-neutral-100 rounded w-1/3"></div>
                   </div>
                 </div>
-                <div className="h-4 bg-slate-100 rounded-md w-full"></div>
-                <div className="pt-2 flex gap-2">
-                  <div className="h-8 bg-slate-200 rounded-xl flex-1"></div>
-                  <div className="h-8 bg-slate-200 rounded-xl flex-1"></div>
+                <div className="h-px bg-neutral-100"></div>
+                <div className="flex justify-end gap-2 pt-1">
+                  <div className="h-6 w-16 bg-neutral-100 rounded"></div>
+                  <div className="h-6 w-16 bg-neutral-100 rounded"></div>
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        {/* Articles List / Grid */}
-        {!loading && articles.length === 0 ? (
+        {/* Articles Grid */}
+        {!loading && displayedArticles.length === 0 ? (
           <EmptyState
-            isSearching={Boolean(searchQuery)}
+            isSearching={Boolean(searchQuery) || filterStatus !== 'all'}
             searchQuery={searchQuery}
-            onClearSearch={() => setSearchQuery('')}
+            onClearSearch={() => {
+              setSearchQuery('');
+              setFilterStatus('all');
+            }}
             onOpenAddModal={handleOpenAdd}
           />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            {articles.map((article) => (
+            {displayedArticles.map((article) => (
               <ArticleCard
                 key={article.id}
                 article={article}
@@ -278,18 +265,18 @@ export default function App() {
         )}
       </main>
 
-      {/* Fixed "Ajouter un article" Button for Mobile thumb ergonomics */}
-      <div className="fixed bottom-0 inset-x-0 p-4 bg-gradient-to-t from-slate-50 via-slate-50/95 to-transparent pointer-events-none z-20 sm:hidden">
+      {/* Floating Action Button for Mobile Thumb Ergonomics */}
+      <div className="fixed bottom-5 inset-x-0 flex justify-center pointer-events-none z-20 sm:hidden">
         <button
           onClick={handleOpenAdd}
-          className="pointer-events-auto w-full py-3.5 px-5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold text-sm rounded-2xl shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer"
+          className="pointer-events-auto px-5 py-2.5 bg-neutral-950 text-white rounded-full shadow-lg text-xs font-medium flex items-center gap-2 active:scale-95 transition-all cursor-pointer border border-neutral-800"
         >
-          <Plus className="w-5 h-5 stroke-[2.5]" />
-          <span>Ajouter un article</span>
+          <Plus className="w-4 h-4" />
+          <span>Nouvel article</span>
         </button>
       </div>
 
-      {/* Add / Edit Article Form Modal */}
+      {/* Modals */}
       <ArticleFormModal
         isOpen={isFormOpen}
         onClose={() => {
@@ -301,7 +288,6 @@ export default function App() {
         isSubmitting={isSubmitting}
       />
 
-      {/* Delete Confirmation Modal */}
       <DeleteConfirmModal
         isOpen={Boolean(deletingArticle)}
         onClose={() => setDeletingArticle(null)}
@@ -310,7 +296,6 @@ export default function App() {
         isDeleting={isDeleting}
       />
 
-      {/* Login / API Credentials Modal */}
       <AuthScreen
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}

@@ -1,22 +1,19 @@
 import React from 'react';
-import { PackageOpen, Plus, SearchX } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 export default function EmptyState({ isSearching, searchQuery, onClearSearch, onOpenAddModal }) {
   if (isSearching) {
     return (
-      <div className="py-12 px-4 text-center bg-white rounded-2xl border border-slate-200/80 shadow-2xs">
-        <div className="w-12 h-12 mx-auto rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
-          <SearchX className="w-6 h-6" />
-        </div>
-        <h3 className="text-sm font-bold text-slate-800">
-          Aucun vêtement ne correspond à "{searchQuery}"
-        </h3>
-        <p className="mt-1 text-xs text-slate-500 max-w-xs mx-auto">
-          Vérifiez l'orthographe du nom ou réinitialisez la recherche.
+      <div className="py-16 px-4 text-center bg-white rounded-xl border border-neutral-200/80">
+        <p className="text-sm font-medium text-neutral-900">
+          Aucun résultat pour "{searchQuery}"
+        </p>
+        <p className="mt-1 text-xs text-neutral-400">
+          Modifiez votre recherche ou réinitialisez le filtre.
         </p>
         <button
           onClick={onClearSearch}
-          className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
+          className="mt-3.5 px-3 py-1.5 text-xs font-medium text-neutral-600 hover:text-neutral-950 bg-neutral-100 hover:bg-neutral-200/80 rounded-lg transition-colors cursor-pointer"
         >
           Effacer la recherche
         </button>
@@ -25,22 +22,22 @@ export default function EmptyState({ isSearching, searchQuery, onClearSearch, on
   }
 
   return (
-    <div className="py-12 px-4 text-center bg-white rounded-2xl border border-dashed border-slate-300 shadow-2xs">
-      <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
-        <PackageOpen className="w-7 h-7" />
+    <div className="py-16 px-4 text-center bg-white rounded-xl border border-neutral-200/80">
+      <div className="w-10 h-10 mx-auto rounded-full bg-neutral-100 flex items-center justify-center text-neutral-500 mb-3">
+        <span className="w-2 h-2 rounded-full bg-neutral-400"></span>
       </div>
-      <h3 className="text-base font-bold text-slate-800">
-        Votre catalogue est vide
+      <h3 className="text-sm font-medium text-neutral-900">
+        Catalogue vide
       </h3>
-      <p className="mt-1 text-xs text-slate-500 max-w-sm mx-auto">
-        Commencez par ajouter votre premier habit ou vêtement pour qu'il soit disponible sur waltr et votre boutique WhatsApp.
+      <p className="mt-1 text-xs text-neutral-400 max-w-xs mx-auto">
+        Ajoutez votre premier article pour le rendre disponible sur votre boutique WhatsApp waltr.
       </p>
       <button
         onClick={onOpenAddModal}
-        className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-semibold rounded-xl transition-all shadow-sm shadow-emerald-600/20 cursor-pointer"
+        className="mt-4 inline-flex items-center gap-1.5 px-3.5 py-2 bg-neutral-950 hover:bg-neutral-800 text-white text-xs font-medium rounded-lg transition-colors cursor-pointer shadow-2xs"
       >
-        <Plus className="w-4 h-4" />
-        Ajouter mon premier article
+        <Plus className="w-3.5 h-3.5" />
+        <span>Ajouter un article</span>
       </button>
     </div>
   );
