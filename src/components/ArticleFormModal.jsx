@@ -1,6 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { X, Check, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  X, 
+  Check, 
+  AlertCircle, 
+  Camera, 
+  Upload, 
+  RefreshCw, 
+  Image as ImageIcon,
+  Sparkles
+} from 'lucide-react';
 import { formatFCFA, validateArticleForm } from '../utils/formatters';
+import { compressImageFile } from '../utils/imageCompressor';
 
 export default function ArticleFormModal({
   isOpen,
@@ -10,13 +20,18 @@ export default function ArticleFormModal({
   isSubmitting = false
 }) {
   const isEditing = Boolean(articleToEdit);
+  const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
     nom: '',
     prix: '',
     stock: '',
+    image: null,
   });
 
+  const [isProcessingPhoto, setIsProcessingPhoto] = useState(false);
+  const [photoError, setPhotoError] = useState(null);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
 
@@ -26,21 +41,47 @@ export default function ArticleFormModal({
         nom: articleToEdit.nom || '',
         prix: articleToEdit.prix !== undefined ? String(articleToEdit.prix) : '',
         stock: articleToEdit.stock !== undefined ? String(articleToEdit.stock) : '',
+        image: articleToEdit.image || null,
       });
       setErrors({});
       setTouched({});
+      setPhotoError(null);
     } else {
       setFormData({
         nom: '',
         prix: '',
         stock: '',
+        image: null,
       });
       setErrors({});
       setTouched({});
+      setPhotoError(null);
     }
   }, [articleToEdit, isOpen]);
 
   if (!isOpen) return null;
+
+  const handlePhotoCapture = async (file) => {
+    if (!file) return;
+    setIsProcessingPhoto(true);
+    setPhotoError(null);
+
+    try {
+      const compressedDataUrl = await compressImageFile(file);
+      setFormData(prev => ({ ...prev, image: compressedDataUrl }));
+    } catch (err) {
+      console.error('Erreur compression image:', err);
+      setPhotoError("Impossible de traiter cette photo. Essayez un autre format d'image.");
+    } finally {
+      setIsProcessingPhoto(false);
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setFormData(prev => ({ ...prev, image: null }));
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (cameraInputRef.current) cameraInputRef.current.value = '';
+  };
 
   const handleChange = (field, value) => {
     const updated = { ...formData, [field]: value };
@@ -72,25 +113,26 @@ export default function ArticleFormModal({
       nom: formData.nom,
       prix: parseInt(formData.prix, 10),
       stock: parseInt(formData.stock, 10),
+      image: formData.image,
     });
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex items-end sm:items-center justify-center p-0 sm:p-4 bg-neutral-900/30 backdrop-blur-xs transition-opacity animate-fade-in">
+    <div className="fixed inset-0 z-50 overflow-y-auto flex items-end sm:items-center justify-center p-0 sm:p-4 bg-neutral-900/40 backdrop-blur-xs transition-opacity animate-fade-in">
       <div 
         className="fixed inset-0" 
         onClick={!isSubmitting ? onClose : undefined}
       />
 
-      <div className="relative bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-neutral-200/80 shadow-xl overflow-hidden z-10 animate-slide-up sm:animate-fade-in">
+      <div className="relative bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl border border-neutral-200/90 shadow-2xl overflow-hidden z-10 animate-slide-up sm:animate-fade-in max-h-[92vh] flex flex-col">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-neutral-100 flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-neutral-100 flex items-center justify-between shrink-0">
           <div>
             <h2 className="text-base font-semibold text-neutral-950 tracking-tight">
-              {isEditing ? "Modifier l'article" : "Nouvel article"}
+              {isEditing ? "Modifier l'article" : "Prendre en photo & Ajouter"}
             </h2>
             <p className="text-xs text-neutral-400 mt-0.5">
-              {isEditing ? "Mettez à jour les champs du catalogue" : "Ajoutez un vêtement au catalogue WhatsApp"}
+              1. Photo de l'habit → 2. Nom → 3. Prix FCFA → 4. Stock
             </p>
           </div>
           
@@ -103,43 +145,153 @@ export default function ArticleFormModal({
           </button>
         </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
-          {/* Field: Nom */}
+        {/* Form Body (Scrollable if needed on mobile) */}
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto flex-1">
+          {/* STEP 1: SNAP THE ITEM (Photo first!) */}
           <div>
-            <label className="block text-xs font-medium text-neutral-700 mb-1.5">
-              Nom de l'article <span className="text-neutral-400">*</span>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-semibold text-neutral-900 flex items-center gap-1.5">
+                <span className="w-4 h-4 rounded-full bg-neutral-950 text-white text-[10px] flex items-center justify-center font-mono">1</span>
+                <span>Photo du vêtement</span>
+              </label>
+              <span className="text-[11px] text-neutral-400">
+                {formData.image ? "Photo enregistrée" : "Recommandé pour WhatsApp"}
+              </span>
+            </div>
+
+            {/* Hidden file inputs for direct camera capture and gallery upload */}
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => e.target.files?.[0] && handlePhotoCapture(e.target.files[0])}
+            />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => e.target.files?.[0] && handlePhotoCapture(e.target.files[0])}
+            />
+
+            {/* Photo Preview or Snap Button */}
+            {formData.image ? (
+              <div className="relative group rounded-xl overflow-hidden border border-neutral-200 bg-neutral-50 aspect-[4/3] flex items-center justify-center">
+                <img
+                  src={formData.image}
+                  alt="Aperçu vêtement"
+                  className="w-full h-full object-cover"
+                />
+                
+                {/* Floating change / remove actions */}
+                <div className="absolute inset-0 bg-neutral-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => cameraInputRef.current?.click()}
+                    className="px-3 py-1.5 bg-white text-neutral-900 text-xs font-medium rounded-lg shadow-sm hover:bg-neutral-100 transition-colors flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                    <span>Reprendre</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRemovePhoto}
+                    className="px-3 py-1.5 bg-rose-600 text-white text-xs font-medium rounded-lg shadow-sm hover:bg-rose-700 transition-colors cursor-pointer"
+                  >
+                    Supprimer
+                  </button>
+                </div>
+
+                <div className="absolute bottom-2 right-2 bg-neutral-950/70 text-white text-[10px] px-2 py-0.5 rounded-md backdrop-blur-xs font-mono">
+                  Photo prête
+                </div>
+              </div>
+            ) : (
+              <div className="border-2 border-dashed border-neutral-200 hover:border-neutral-400 rounded-xl p-4 sm:p-5 text-center transition-colors bg-neutral-50/50">
+                {isProcessingPhoto ? (
+                  <div className="py-4 flex flex-col items-center justify-center gap-2 text-neutral-500 text-xs">
+                    <RefreshCw className="w-5 h-5 animate-spin text-neutral-900" />
+                    <span>Traitement de la photo...</span>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex items-center justify-center gap-3 mb-3">
+                      {/* Direct Snap with camera button */}
+                      <button
+                        type="button"
+                        onClick={() => cameraInputRef.current?.click()}
+                        className="px-4 py-2.5 bg-neutral-950 hover:bg-neutral-800 text-white rounded-xl text-xs font-medium flex items-center gap-2 shadow-2xs transition-all active:scale-95 cursor-pointer"
+                      >
+                        <Camera className="w-4 h-4 text-orange-400" />
+                        <span>Prendre une photo (Appareil)</span>
+                      </button>
+
+                      {/* Pick from gallery */}
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-3 py-2.5 bg-white hover:bg-neutral-100 border border-neutral-200 text-neutral-700 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                        title="Importer depuis vos fichiers"
+                      >
+                        <Upload className="w-3.5 h-3.5" />
+                        <span className="hidden xs:inline">Galerie</span>
+                      </button>
+                    </div>
+
+                    <p className="text-[11px] text-neutral-400">
+                      Photographiez le vêtement sur cintre ou porté. La photo sera synchronisée avec votre catalogue WhatsApp.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {photoError && (
+              <p className="mt-1 text-xs text-rose-500 flex items-center gap-1">
+                <AlertCircle className="w-3.5 h-3.5" />
+                {photoError}
+              </p>
+            )}
+          </div>
+
+          {/* STEP 2: NOM DE L'ARTICLE */}
+          <div>
+            <label className="block text-xs font-semibold text-neutral-900 mb-1.5 flex items-center gap-1.5">
+              <span className="w-4 h-4 rounded-full bg-neutral-950 text-white text-[10px] flex items-center justify-center font-mono">2</span>
+              <span>Nom du vêtement / article <span className="text-neutral-400">*</span></span>
             </label>
             <input
               type="text"
               required
-              autoFocus
               value={formData.nom}
               onChange={(e) => handleChange('nom', e.target.value)}
               onBlur={() => handleBlur('nom')}
-              placeholder="ex: Chemise en lin blanc"
-              className={"w-full px-3 py-2 text-sm rounded-lg border bg-white outline-hidden transition-colors " + (
+              placeholder="ex: Chemise Lin Blanche Col Mao"
+              className={`w-full px-3 py-2 text-sm rounded-lg border bg-white outline-hidden transition-colors ${
                 errors.nom && touched.nom
                   ? 'border-rose-300 focus:border-rose-500'
                   : 'border-neutral-200 focus:border-neutral-950'
-              )}
+              }`}
             />
             {errors.nom && touched.nom && (
               <p className="mt-1 text-xs text-rose-500 flex items-center gap-1">
-                <AlertCircle className="w-3 h-3" />
+                <AlertCircle className="w-3.5 h-3.5" />
                 {errors.nom}
               </p>
             )}
           </div>
 
-          {/* Field: Prix */}
+          {/* STEP 3: PRIX EN FCFA */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-medium text-neutral-700">
-                Prix (FCFA) <span className="text-neutral-400">*</span>
+              <label className="text-xs font-semibold text-neutral-900 flex items-center gap-1.5">
+                <span className="w-4 h-4 rounded-full bg-neutral-950 text-white text-[10px] flex items-center justify-center font-mono">3</span>
+                <span>Prix (en FCFA) <span className="text-neutral-400">*</span></span>
               </label>
               {formData.prix && !isNaN(Number(formData.prix)) && (
-                <span className="text-xs font-mono font-medium text-neutral-500">
+                <span className="text-xs font-mono font-medium text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded">
                   {formatFCFA(formData.prix)}
                 </span>
               )}
@@ -153,12 +305,12 @@ export default function ArticleFormModal({
                 value={formData.prix}
                 onChange={(e) => handleChange('prix', e.target.value)}
                 onBlur={() => handleBlur('prix')}
-                placeholder="15000"
-                className={"w-full px-3 py-2 pr-12 text-sm rounded-lg border bg-white outline-hidden font-mono transition-colors " + (
+                placeholder="ex: 15000"
+                className={`w-full px-3 py-2 pr-12 text-sm rounded-lg border bg-white outline-hidden font-mono transition-colors ${
                   errors.prix && touched.prix
                     ? 'border-rose-300 focus:border-rose-500'
                     : 'border-neutral-200 focus:border-neutral-950'
-                )}
+                }`}
               />
               <span className="absolute inset-y-0 right-0 pr-3 flex items-center text-xs font-mono text-neutral-400 pointer-events-none">
                 FCFA
@@ -166,16 +318,17 @@ export default function ArticleFormModal({
             </div>
             {errors.prix && touched.prix && (
               <p className="mt-1 text-xs text-rose-500 flex items-center gap-1">
-                <AlertCircle className="w-3 h-3" />
+                <AlertCircle className="w-3.5 h-3.5" />
                 {errors.prix}
               </p>
             )}
           </div>
 
-          {/* Field: Stock */}
+          {/* STEP 4: QUANTITÉ EN STOCK */}
           <div>
-            <label className="block text-xs font-medium text-neutral-700 mb-1.5">
-              Quantité en stock <span className="text-neutral-400">*</span>
+            <label className="block text-xs font-semibold text-neutral-900 mb-1.5 flex items-center gap-1.5">
+              <span className="w-4 h-4 rounded-full bg-neutral-950 text-white text-[10px] flex items-center justify-center font-mono">4</span>
+              <span>Quantité en stock <span className="text-neutral-400">*</span></span>
             </label>
             <input
               type="number"
@@ -185,26 +338,26 @@ export default function ArticleFormModal({
               value={formData.stock}
               onChange={(e) => handleChange('stock', e.target.value)}
               onBlur={() => handleBlur('stock')}
-              placeholder="10 (0 = Épuisé)"
-              className={"w-full px-3 py-2 text-sm rounded-lg border bg-white outline-hidden font-mono transition-colors " + (
+              placeholder="ex: 8 (ou 0 pour rupture)"
+              className={`w-full px-3 py-2 text-sm rounded-lg border bg-white outline-hidden font-mono transition-colors ${
                 errors.stock && touched.stock
                   ? 'border-rose-300 focus:border-rose-500'
                   : 'border-neutral-200 focus:border-neutral-950'
-              )}
+              }`}
             />
             {errors.stock && touched.stock ? (
               <p className="mt-1 text-xs text-rose-500 flex items-center gap-1">
-                <AlertCircle className="w-3 h-3" />
+                <AlertCircle className="w-3.5 h-3.5" />
                 {errors.stock}
               </p>
             ) : (
               <p className="mt-1 text-[11px] text-neutral-400">
-                Définir 0 marquera l'article comme Épuisé.
+                0 indiquera automatiquement la mention "Épuisé" aux clients WhatsApp.
               </p>
             )}
           </div>
 
-          {/* Actions */}
+          {/* Submit Action */}
           <div className="pt-3 flex items-center justify-end gap-2 border-t border-neutral-100">
             <button
               type="button"
@@ -227,7 +380,7 @@ export default function ArticleFormModal({
               ) : (
                 <>
                   <Check className="w-3.5 h-3.5" />
-                  <span>{isEditing ? "Enregistrer" : "Ajouter"}</span>
+                  <span>{isEditing ? "Enregistrer les modifications" : "Publier l'article"}</span>
                 </>
               )}
             </button>

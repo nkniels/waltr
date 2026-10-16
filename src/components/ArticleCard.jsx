@@ -7,11 +7,11 @@ export default function ArticleCard({ article, onEdit, onDelete }) {
   const isLowStock = article.stock > 0 && article.stock <= 3;
 
   return (
-    <article className={"group relative bg-white rounded-xl border transition-all duration-150 flex flex-col justify-between overflow-hidden " + (
+    <article className={`group relative bg-white rounded-xl border transition-all duration-150 flex flex-col justify-between overflow-hidden ${
       isOutOfStock 
-        ? "border-neutral-200/60 bg-neutral-50/30" 
-        : "border-neutral-200/80 hover:border-neutral-300 hover:shadow-2xs"
-    )}>
+        ? 'border-neutral-200/60 bg-neutral-50/30' 
+        : 'border-neutral-200/80 hover:border-neutral-300 hover:shadow-2xs'
+    }`}>
       <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
         <div>
           {/* Header Row: ID + Stock status badge */}
@@ -21,8 +21,8 @@ export default function ArticleCard({ article, onEdit, onDelete }) {
             </span>
 
             {isOutOfStock ? (
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-rose-50 text-rose-700 border border-rose-200/60">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-neutral-100 text-neutral-600 border border-neutral-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-neutral-400"></span>
                 Épuisé
               </span>
             ) : isLowStock ? (
@@ -31,27 +31,36 @@ export default function ArticleCard({ article, onEdit, onDelete }) {
                 {article.stock} restant{article.stock > 1 ? 's' : ''}
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium text-neutral-600 bg-neutral-50 border border-neutral-200/70">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium text-neutral-600">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                 {article.stock} en stock
               </span>
             )}
           </div>
 
-          {/* Main Info with Photo Thumbnail */}
+          {/* Main Info with Real Snapped Photo Thumbnail */}
           <div className="flex items-start gap-3.5">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-neutral-100/80 border border-neutral-200/60 flex items-center justify-center text-neutral-400 shrink-0">
-              <Shirt className="w-5 h-5 text-neutral-400 stroke-[1.5]" />
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-neutral-100 border border-neutral-200/70 overflow-hidden flex items-center justify-center text-neutral-400 shrink-0 select-none">
+              {article.image ? (
+                <img
+                  src={article.image}
+                  alt={article.nom}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                />
+              ) : (
+                <Shirt className="w-6 h-6 text-neutral-400 stroke-[1.5]" />
+              )}
             </div>
 
             <div className="flex-1 min-w-0 pt-0.5">
-              <h3 className={"text-sm sm:text-base font-medium tracking-tight text-neutral-900 leading-snug line-clamp-2 " + (
-                isOutOfStock ? "text-neutral-500 line-through decoration-neutral-300" : ""
-              )}>
+              <h3 className={`text-sm sm:text-base font-semibold tracking-tight text-neutral-900 leading-snug line-clamp-2 ${
+                isOutOfStock ? 'text-neutral-500 line-through decoration-neutral-300' : ''
+              }`}>
                 {article.nom}
               </h3>
 
-              <div className="mt-1 font-semibold text-neutral-950 text-base sm:text-lg tracking-tight">
+              <div className="mt-1.5 font-bold text-neutral-950 text-base sm:text-lg tracking-tight">
                 {formatFCFA(article.prix)}
               </div>
             </div>

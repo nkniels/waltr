@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Plus, 
+  Camera, 
   AlertCircle, 
   RefreshCw, 
   Sparkles 
@@ -11,24 +12,22 @@ import ArticleCard from './components/ArticleCard';
 import ArticleFormModal from './components/ArticleFormModal';
 import DeleteConfirmModal from './components/DeleteConfirmModal';
 import AuthScreen from './components/AuthScreen';
+import FirstLoginModal from './components/FirstLoginModal';
 import EmptyState from './components/EmptyState';
 import Toast from './components/Toast';
 import OnboardingModal from './components/OnboardingModal';
 
 export default function App() {
-  // Authentication & Session State
-  const [isAuthenticated, setIsAuthenticated] = useState(() => api.isAuthenticated());
-  const [isMockMode, setIsMockMode] = useState(() => api.isInMockMode());
-  const [token, setToken] = useState(() => api.getToken());
-  const [apiUrl, setApiUrl] = useState(() => api.getBaseUrl());
-  const [currentUser, setCurrentUser] = useState(() => api.getCurrentUser());
-
-  // Catalog State
   const [articles, setArticles] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all'); // 'all' | 'in_stock' | 'out_of_stock'
+
+  // Store Profile & Multi-tenant Database
+  const [storeProfile, setStoreProfile] = useState(() => api.getStoreProfile());
+  const [isMustChangePassword, setIsMustChangePassword] = useState(() => api.isMustChangePassword());
+  const [isLoggedIn, setIsLoggedIn] = useState(() => api.isAuthenticated());
 
   // Modals state
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -40,8 +39,14 @@ export default function App() {
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  // Onboarding state: opens only for users explicitly requesting it or first time in dashboard
-  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  // Onboarding state
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(() => {
+    try {
+      return !localStorage.getItem('waltr_onboarding_completed');
+    } catch (e) {
+      return false;
+    }
+  });
 
   // Toast state
   const [toast, setToast] = useState(null);
@@ -50,10 +55,8 @@ export default function App() {
     setToast({ message, type });
   };
 
-  // Fetch articles from API or Mock
+  // Fetch articles from connected database
   const fetchArticles = useCallback(async (query = searchQuery) => {
-    if (!api.isAuthenticated()) return;
-
     setLoading(true);
     setErrorMessage(null);
 
@@ -62,79 +65,39 @@ export default function App() {
       setArticles(data || []);
     } catch (err) {
       console.error('Fetch error:', err);
-      if (err.message && (err.message.includes('401') || err.message.includes('expirée'))) {
-        api.logout();
-        setIsAuthenticated(false);
-        showToast("Votre session a expiré. Veuillez vous reconnecter.", "error");
-        return;
-      }
       setErrorMessage(
-        err.message || "Erreur de communication avec le serveur API."
+        err.message || "Erreur de connexion avec la base de données de la boutique."
       );
     } finally {
       setLoading(false);
     }
   }, [searchQuery]);
 
-  // Initial load when authenticated
+  // Initial load
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchArticles();
-    }
-  }, [isAuthenticated, fetchArticles]);
+    fetchArticles();
+  }, [fetchArticles]);
 
   // Debounced search
   useEffect(() => {
-    if (!isAuthenticated) return;
     const timer = setTimeout(() => {
       fetchArticles(searchQuery);
-    }, 280);
-
+    }, 200);
     return () => clearTimeout(timer);
-  }, [searchQuery, isAuthenticated, fetchArticles]);
+  }, [searchQuery, fetchArticles]);
 
-  // Handle Login Success (from Login screen or Settings modal)
-  const handleLoginSuccess = ({ token: newToken, apiUrl: newUrl, isMock, user }) => {
-    if (isMock) {
-      api.loginAsDemo();
-    } else if (newToken) {
-      api.setCredentials(newToken, newUrl, false);
-      if (user) {
-        localStorage.setItem('whatsapp_shop_user', user);
-      }
-    }
-    setIsAuthenticated(true);
-    setIsMockMode(api.isInMockMode());
-    setToken(api.getToken());
-    setApiUrl(api.getBaseUrl());
-    setCurrentUser(api.getCurrentUser());
-    showToast(isMock ? "Connecté en Mode Démo" : "Connexion à la boutique réussie !");
-    fetchArticles();
-  };
-
-  // Handle Logout
-  const handleLogout = () => {
-    api.logout();
-    setIsAuthenticated(false);
-    setToken('');
-    setCurrentUser('');
-    setIsMockMode(true);
-    setArticles([]);
-    showToast("Vous avez été déconnecté avec succès.", "info");
-  };
-
-  // Handle Add/Edit Submit
+  // Handle Create or Update (With photo!)
   const handleSaveArticle = async (articleData) => {
     setIsSubmitting(true);
     try {
       if (editingArticle) {
         const updated = await api.updateArticle(editingArticle.id, articleData);
-        setArticles(prev => prev.map(item => item.id === updated.id ? updated : item));
-        showToast(`Article "${updated.nom}" mis à jour.`);
+        setArticles(prev => prev.map(item => item.id === editingArticle.id ? updated : item));
+        showToast(`Article "${updated.nom}" mis à jour avec photo.`);
       } else {
         const created = await api.createArticle(articleData);
         setArticles(prev => [created, ...prev]);
-        showToast(`Article "${created.nom}" ajouté avec succès.`);
+        showToast(`Article "${created.nom}" ajouté au catalogue !`);
       }
       setIsFormOpen(false);
       setEditingArticle(null);
@@ -152,7 +115,7 @@ export default function App() {
     try {
       await api.deleteArticle(id);
       setArticles(prev => prev.filter(item => item.id !== id));
-      showToast("Article supprimé du catalogue.");
+      showToast("Article supprimé de la base de données.");
       setDeletingArticle(null);
     } catch (err) {
       console.error('Delete failed:', err);
@@ -172,10 +135,42 @@ export default function App() {
     setIsFormOpen(true);
   };
 
-  const handleResetMock = () => {
-    const defaults = api.resetMockData();
-    setArticles(defaults);
-    showToast("Données de démo réinitialisées.");
+  // First Login Password Creation
+  const handlePasswordCreated = async (newPassword) => {
+    await api.createNewPassword(newPassword);
+    setIsMustChangePassword(false);
+    setIsLoggedIn(true);
+    setStoreProfile(api.getStoreProfile());
+    showToast("Mot de passe créé avec succès ! Bienvenue sur votre tableau de bord waltr.");
+  };
+
+  // Merchant Sign In
+  const handleLogin = async (email, password) => {
+    const res = await api.login(email, password);
+    setStoreProfile(api.getStoreProfile());
+    setIsLoggedIn(true);
+    setIsMustChangePassword(res.mustChangePassword);
+    if (res.mustChangePassword) {
+      showToast("Première connexion détectée. Définissez votre mot de passe personnel.", "info");
+    } else {
+      showToast(`Connecté à ${storeProfile.storeName}`);
+    }
+    fetchArticles();
+  };
+
+  const handleDemoLogin = () => {
+    api.loginDemo();
+    setStoreProfile(api.getStoreProfile());
+    setIsLoggedIn(true);
+    setIsMustChangePassword(false);
+    showToast("Session démo activée.");
+    fetchArticles();
+  };
+
+  const handleLogout = () => {
+    api.logout();
+    setIsLoggedIn(false);
+    showToast("Déconnexion réussie.", "info");
   };
 
   // Filter articles based on active filter
@@ -185,25 +180,6 @@ export default function App() {
     return true;
   });
 
-  // SCREEN 1: Non-authenticated => Show Dedicated Login & Sign In Dashboard
-  if (!isAuthenticated) {
-    return (
-      <>
-        <Toast toast={toast} onClose={() => setToast(null)} />
-        <AuthScreen
-          isModal={false}
-          isOpen={true}
-          onLoginSuccess={handleLoginSuccess}
-          currentToken={token}
-          currentApiUrl={apiUrl}
-          isMockMode={isMockMode}
-          onResetMock={handleResetMock}
-        />
-      </>
-    );
-  }
-
-  // SCREEN 2: Authenticated => Show Full WhatsApp Commerce Dashboard
   return (
     <div className="min-h-screen bg-[#fafafa] flex flex-col font-['Inter',-apple-system,sans-serif] text-neutral-900">
       {/* Toast Notification */}
@@ -217,10 +193,7 @@ export default function App() {
         onOpenAddModal={handleOpenAdd}
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
         onOpenOnboarding={() => setIsOnboardingOpen(true)}
-        isMockMode={isMockMode}
-        token={token}
-        apiUrl={apiUrl}
-        currentUser={currentUser}
+        storeProfile={storeProfile}
         onRefresh={() => fetchArticles()}
         loading={loading}
         onLogout={handleLogout}
@@ -230,7 +203,7 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-6 pb-24">
-        {/* Error Alert */}
+        {/* Understated Error Alert */}
         {errorMessage && (
           <div className="mb-5 p-3.5 rounded-xl bg-white border border-neutral-200 text-neutral-800 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2.5">
@@ -244,12 +217,6 @@ export default function App() {
                 className="px-2.5 py-1 text-neutral-700 hover:text-neutral-950 font-medium hover:bg-neutral-100 rounded-md transition-colors cursor-pointer"
               >
                 Réessayer
-              </button>
-              <button
-                onClick={() => handleLoginSuccess({ token: '', apiUrl, isMock: true, user: 'Mode Démo' })}
-                className="px-2.5 py-1 bg-neutral-900 text-white rounded-md font-medium transition-colors cursor-pointer"
-              >
-                Passer en Mode Démo
               </button>
             </div>
           </div>
@@ -266,14 +233,19 @@ export default function App() {
             </span>
           </div>
 
-          <button
-            onClick={() => setIsOnboardingOpen(true)}
-            className="text-[11px] text-neutral-400 hover:text-neutral-700 font-mono transition-colors cursor-pointer flex items-center gap-1"
-            title="Revoir la présentation"
-          >
-            <span>waltr commerce</span>
-            <span className="text-[10px]">✨</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-neutral-400 font-mono hidden xs:inline">
+              Base : {storeProfile?.databaseId}
+            </span>
+            <button
+              onClick={() => setIsOnboardingOpen(true)}
+              className="text-[11px] text-neutral-500 hover:text-neutral-950 font-medium transition-colors cursor-pointer flex items-center gap-1"
+              title="Revoir la présentation"
+            >
+              <span>Guide</span>
+              <span className="text-orange-500">✨</span>
+            </button>
+          </div>
         </div>
 
         {/* Loading Skeletons */}
@@ -282,7 +254,7 @@ export default function App() {
             {[1, 2, 3, 4].map(idx => (
               <div key={idx} className="bg-white rounded-xl p-4 border border-neutral-200/70 animate-pulse space-y-3">
                 <div className="flex gap-3">
-                  <div className="w-14 h-14 bg-neutral-100 rounded-lg"></div>
+                  <div className="w-16 h-16 bg-neutral-100 rounded-xl"></div>
                   <div className="flex-1 space-y-2 py-1">
                     <div className="h-3.5 bg-neutral-100 rounded w-3/4"></div>
                     <div className="h-4 bg-neutral-100 rounded w-1/3"></div>
@@ -298,7 +270,7 @@ export default function App() {
           </div>
         )}
 
-        {/* Articles Grid or Empty State */}
+        {/* Articles Grid */}
         {!loading && displayedArticles.length === 0 ? (
           <EmptyState
             isSearching={Boolean(searchQuery) || filterStatus !== 'all'}
@@ -323,16 +295,23 @@ export default function App() {
         )}
       </main>
 
-      {/* Floating Action Button for Mobile Thumb Ergonomics */}
+      {/* Floating Action Button for Mobile: Snap Photo */}
       <div className="fixed bottom-5 inset-x-0 flex justify-center pointer-events-none z-20 sm:hidden">
         <button
           onClick={handleOpenAdd}
           className="pointer-events-auto px-5 py-2.5 bg-neutral-950 text-white rounded-full shadow-lg text-xs font-medium flex items-center gap-2 active:scale-95 transition-all cursor-pointer border border-neutral-800"
         >
-          <Plus className="w-4 h-4" />
-          <span>Nouvel article</span>
+          <Camera className="w-4 h-4 text-orange-400" />
+          <span>Photographier un habit</span>
         </button>
       </div>
+
+      {/* First Login Password Creation Modal (Prompted when user arrives via invite / first sign in) */}
+      <FirstLoginModal
+        isOpen={isMustChangePassword}
+        storeProfile={storeProfile}
+        onPasswordCreated={handlePasswordCreated}
+      />
 
       {/* Onboarding Experience Modal */}
       <OnboardingModal
@@ -341,7 +320,7 @@ export default function App() {
         onOpenAddModal={handleOpenAdd}
       />
 
-      {/* Add / Edit Article Modal */}
+      {/* "Snap First" Add / Edit Article Form Modal */}
       <ArticleFormModal
         isOpen={isFormOpen}
         onClose={() => {
@@ -362,16 +341,15 @@ export default function App() {
         isDeleting={isDeleting}
       />
 
-      {/* Auth & API Settings Modal (When logged in) */}
+      {/* Account, Store, & Database Management Modal */}
       <AuthScreen
-        isModal={true}
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-        onLoginSuccess={handleLoginSuccess}
-        currentToken={token}
-        currentApiUrl={apiUrl}
-        isMockMode={isMockMode}
-        onResetMock={handleResetMock}
+        storeProfile={storeProfile}
+        onLogin={handleLogin}
+        onDemoLogin={handleDemoLogin}
+        onLogout={handleLogout}
+        isLoggedIn={isLoggedIn}
       />
     </div>
   );
