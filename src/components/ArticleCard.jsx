@@ -1,8 +1,10 @@
 import React from 'react';
 import { Shirt, Edit3, Trash2 } from 'lucide-react';
 import { formatFCFA } from '../utils/formatters';
+import { TRANSLATIONS } from '../i18n';
 
-export default function ArticleCard({ article, onEdit, onDelete }) {
+export default function ArticleCard({ article, onEdit, onDelete, lang = 'fr' }) {
+  const t = (key) => TRANSLATIONS[lang]?.[key] || TRANSLATIONS['fr']?.[key] || key;
   const isOutOfStock = article.stock === 0;
   const isLowStock = article.stock > 0 && article.stock <= 3;
 
@@ -23,17 +25,17 @@ export default function ArticleCard({ article, onEdit, onDelete }) {
             {isOutOfStock ? (
               <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-neutral-100 text-neutral-600 border border-neutral-200">
                 <span className="w-1.5 h-1.5 rounded-full bg-neutral-400"></span>
-                Épuisé
+                {t('soldOut')}
               </span>
             ) : isLowStock ? (
               <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 text-amber-800 border border-amber-200/60">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                {article.stock} restant{article.stock > 1 ? 's' : ''}
+                {article.stock} {article.stock > 1 ? t('unitsLeftPlural') : t('unitsLeft')}
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium text-neutral-600">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                {article.stock} en stock
+                {article.stock} {t('inStockCount')}
               </span>
             )}
           </div>
@@ -72,19 +74,19 @@ export default function ArticleCard({ article, onEdit, onDelete }) {
           <button
             onClick={() => onEdit(article)}
             className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-neutral-600 hover:text-neutral-950 hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer"
-            title="Modifier l'article"
+            title={t('edit')}
           >
             <Edit3 className="w-3.5 h-3.5" />
-            <span>Modifier</span>
+            <span>{t('edit')}</span>
           </button>
 
           <button
             onClick={() => onDelete(article)}
             className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-neutral-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-            title="Supprimer l'article"
+            title={t('delete')}
           >
             <Trash2 className="w-3.5 h-3.5" />
-            <span>Supprimer</span>
+            <span>{t('delete')}</span>
           </button>
         </div>
       </div>

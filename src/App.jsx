@@ -16,6 +16,7 @@ import FirstLoginModal from './components/FirstLoginModal';
 import EmptyState from './components/EmptyState';
 import Toast from './components/Toast';
 import OnboardingModal from './components/OnboardingModal';
+import { TRANSLATIONS, getInitialLanguage, saveLanguage } from './i18n';
 
 export default function App() {
   const [articles, setArticles] = useState([]);
@@ -23,6 +24,22 @@ export default function App() {
   const [errorMessage, setErrorMessage] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all'); // 'all' | 'in_stock' | 'out_of_stock'
+
+  // Internationalisation (FR / EN)
+  const [lang, setLang] = useState(() => getInitialLanguage());
+
+  const handleLanguageChange = (newLang) => {
+    setLang(newLang);
+    saveLanguage(newLang);
+  };
+
+  const t = (key, params = {}) => {
+    let str = TRANSLATIONS[lang]?.[key] || TRANSLATIONS['fr']?.[key] || key;
+    Object.entries(params).forEach(([k, v]) => {
+      str = str.replace(`{${k}}`, v);
+    });
+    return str;
+  };
 
   // Store Profile & Multi-tenant Database
   const [storeProfile, setStoreProfile] = useState(() => api.getStoreProfile());
@@ -60,12 +77,12 @@ export default function App() {
     } catch (err) {
       console.error('Fetch error:', err);
       setErrorMessage(
-        err.message || "Erreur de connexion avec la base de données de la boutique."
+        err.message || (lang === 'en' ? "Failed to connect to the store database." : "Erreur de connexion avec la base de données de la boutique.")
       );
     } finally {
       setLoading(false);
     }
-  }, [searchQuery]);
+  }, [searchQuery, lang]);
 
   // Initial load
   useEffect(() => {
@@ -87,17 +104,17 @@ export default function App() {
       if (editingArticle) {
         const updated = await api.updateArticle(editingArticle.id, articleData);
         setArticles(prev => prev.map(item => item.id === editingArticle.id ? updated : item));
-        showToast(`Article "${updated.nom}" mis à jour avec photo.`);
+        showToast(t('articleUpdated', { nom: updated.nom }));
       } else {
         const created = await api.createArticle(articleData);
         setArticles(prev => [created, ...prev]);
-        showToast(`Article "${created.nom}" ajouté au catalogue !`);
+        showToast(t('articleAdded', { nom: created.nom }));
       }
       setIsFormOpen(false);
       setEditingArticle(null);
     } catch (err) {
       console.error('Save failed:', err);
-      showToast(err.message || "Erreur lors de l'enregistrement.", 'error');
+      showToast(err.message || (lang === 'en' ? "Error saving item." : "Erreur lors de l'enregistrement."), 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -109,11 +126,11 @@ export default function App() {
     try {
       await api.deleteArticle(id);
       setArticles(prev => prev.filter(item => item.id !== id));
-      showToast("Article supprimé de la base de données.");
+      showToast(t('articleDeleted'));
       setDeletingArticle(null);
     } catch (err) {
       console.error('Delete failed:', err);
-      showToast(err.message || "Erreur lors de la suppression.", 'error');
+      showToast(err.message || (lang === 'en' ? "Error deleting item." : "Erreur lors de la suppression."), 'error');
     } finally {
       setIsDeleting(false);
     }
@@ -135,7 +152,7 @@ export default function App() {
     setIsMustChangePassword(false);
     setIsLoggedIn(true);
     setStoreProfile(api.getStoreProfile());
-    showToast("Mot de passe créé avec succès ! Bienvenue sur votre tableau de bord waltr.");
+    showToast(t('passwordCreatedSuccess'));
   };
 
   // Merchant Sign In
@@ -145,9 +162,9 @@ export default function App() {
     setIsLoggedIn(true);
     setIsMustChangePassword(res.mustChangePassword);
     if (res.mustChangePassword) {
-      showToast("Première connexion détectée. Définissez votre mot de passe personnel.", "info");
+      showToast(t('firstLoginDetected'), "info");
     } else {
-      showToast(`Connecté à ${storeProfile.storeName}`);
+      showToast(t('connectedTo', { store: storeProfile.storeName }));
     }
     fetchArticles();
   };
@@ -157,28 +174,28 @@ export default function App() {
     setStoreProfile(api.getStoreProfile());
     setIsLoggedIn(true);
     setIsMustChangePassword(false);
-    showToast("Session démo activée.");
+    showToast(t('demoActivated'));
     fetchArticles();
   };
 
   const handleLogout = () => {
     api.logout();
     setIsLoggedIn(false);
-    showToast("Déconnexion réussie.", "info");
+    showToast(t('logoutSuccess'), "info");
   };
 
   // Remise à l'état propre (0 articles)
   const handleClearDatabase = () => {
     api.clearDatabase();
     setArticles([]);
-    showToast("Base de données réinitialisée. Votre catalogue est maintenant vide et propre.", "info");
+    showToast(t('databaseCleared'), "info");
   };
 
   // Chargement d'articles exemples de test (optionnel)
   const handleLoadSamples = () => {
     const samples = api.loadSampleArticles();
     setArticles(samples);
-    showToast("Exemples de test chargés dans votre base.");
+    showToast(t('samplesLoaded'));
   };
 
   // Filter articles based on active filter
@@ -207,6 +224,8 @@ export default function App() {
         onLogout={handleLogout}
         filterStatus={filterStatus}
         onFilterChange={setFilterStatus}
+        lang={lang}
+        onLanguageChange={handleLanguageChange}
       />
 
       {/* Main Content Area */}
@@ -224,7 +243,7 @@ export default function App() {
                 onClick={() => fetchArticles()}
                 className="px-2.5 py-1 text-neutral-700 hover:text-neutral-950 font-medium hover:bg-neutral-100 rounded-md transition-colors cursor-pointer"
               >
-                Réessayer
+                {t('retry')}
               </button>
             </div>
           </div>
@@ -234,7 +253,7 @@ export default function App() {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-semibold tracking-tight text-neutral-950">
-              {searchQuery ? `Recherche "${searchQuery}"` : 'Articles du catalogue'}
+              {searchQuery ? `${t('searchTitle')} "${searchQuery}"` : t('catalogTitle')}
             </h2>
             <span className="text-[11px] font-mono text-neutral-400">
               ({displayedArticles.length})
@@ -243,14 +262,14 @@ export default function App() {
 
           <div className="flex items-center gap-2">
             <span className="text-[11px] text-neutral-400 font-mono hidden xs:inline">
-              Base : {storeProfile?.databaseId}
+              {t('database')} : {storeProfile?.databaseId}
             </span>
             <button
               onClick={() => setIsOnboardingOpen(true)}
               className="text-[11px] text-neutral-500 hover:text-neutral-950 font-medium transition-colors cursor-pointer flex items-center gap-1"
-              title="Revoir la présentation"
+              title={t('guide')}
             >
-              <span>Guide</span>
+              <span>{t('guide')}</span>
               <span className="text-orange-500">✨</span>
             </button>
           </div>
@@ -288,6 +307,7 @@ export default function App() {
               setFilterStatus('all');
             }}
             onOpenAddModal={handleOpenAdd}
+            lang={lang}
           />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -297,6 +317,7 @@ export default function App() {
                 article={article}
                 onEdit={handleOpenEdit}
                 onDelete={(item) => setDeletingArticle(item)}
+                lang={lang}
               />
             ))}
           </div>
@@ -310,7 +331,7 @@ export default function App() {
           className="pointer-events-auto px-5 py-2.5 bg-neutral-950 text-white rounded-full shadow-lg text-xs font-medium flex items-center gap-2 active:scale-95 transition-all cursor-pointer border border-neutral-800"
         >
           <Camera className="w-4 h-4 text-orange-400" />
-          <span>Photographier un habit</span>
+          <span>{t('snapClothing')}</span>
         </button>
       </div>
 
@@ -319,6 +340,7 @@ export default function App() {
         isOpen={isMustChangePassword}
         storeProfile={storeProfile}
         onPasswordCreated={handlePasswordCreated}
+        lang={lang}
       />
 
       {/* Onboarding Experience Modal */}
@@ -326,6 +348,7 @@ export default function App() {
         isOpen={isOnboardingOpen}
         onClose={() => setIsOnboardingOpen(false)}
         onOpenAddModal={handleOpenAdd}
+        lang={lang}
       />
 
       {/* "Snap First" Add / Edit Article Form Modal */}
@@ -338,6 +361,7 @@ export default function App() {
         onSubmit={handleSaveArticle}
         articleToEdit={editingArticle}
         isSubmitting={isSubmitting}
+        lang={lang}
       />
 
       {/* Delete Confirmation Modal */}
@@ -347,6 +371,7 @@ export default function App() {
         onConfirm={handleDeleteArticle}
         article={deletingArticle}
         isDeleting={isDeleting}
+        lang={lang}
       />
 
       {/* Account, Store, & Database Management Modal */}
@@ -360,6 +385,7 @@ export default function App() {
         isLoggedIn={isLoggedIn}
         onClearDatabase={handleClearDatabase}
         onLoadSamples={handleLoadSamples}
+        lang={lang}
       />
     </div>
   );

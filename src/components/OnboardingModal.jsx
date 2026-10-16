@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronRight, ChevronLeft, X } from 'lucide-react';
+import { ChevronRight, ChevronLeft, X, Camera } from 'lucide-react';
 import WaltrMascot from './WaltrMascot';
 
-const ONBOARDING_STEPS = [
+const ONBOARDING_STEPS_FR = [
   {
     id: 'welcome',
     image: '/illustrations/waltr-welcome.jpg',
@@ -11,23 +11,23 @@ const ONBOARDING_STEPS = [
     title: 'Rencontrez waltr',
     subtitle: 'Votre copilote intelligent WhatsApp Commerce',
     description:
-      'waltr transforme votre boutique WhatsApp en machine de vente fluide. Gérez vos articles, suivez vos stocks et servez vos clients sans friction.',
+      'waltr est votre pote intelligent qui vous aide à organiser et gérer votre boutique WhatsApp au quotidien.',
     bullets: [
       'Gestion simple pensée pour le commerce en Afrique',
-      'Fonctionne immédiatement en Mode Démo ou avec votre API',
+      'Votre boutique est au centre, waltr est là pour vous épauler',
     ],
   },
   {
     id: 'catalog',
     image: '/illustrations/waltr-catalog.jpg',
     fallbackVariant: 'catalog',
-    badge: 'Catalogue & Stocks',
-    title: 'Gestion ultra-simple des articles',
-    subtitle: 'Prix en FCFA & alertes de rupture automatiques',
+    badge: 'Snap First',
+    title: 'Photographiez l\'habit d\'abord',
+    subtitle: 'Photo → Nom → Prix FCFA → Stock',
     description:
-      'Remplissez simplement le nom, le prix en FCFA et la quantité en stock. Dès qu\'un vêtement est épuisé, waltr l\'affiche immédiatement en rupture.',
+      'Prenez en photo votre article directement en rayon. Renseignez son nom, son prix en FCFA et sa quantité en quelques secondes.',
     bullets: [
-      'Formatage monétaire FCFA instantané',
+      '1. Photo nette avec votre appareil ou galerie',
       'Filtres en 1 clic : Tous, En stock, Rupture',
     ],
   },
@@ -50,10 +50,10 @@ const ONBOARDING_STEPS = [
     image: '/illustrations/waltr-launch.jpg',
     fallbackVariant: 'launch',
     badge: 'Prêt à vendre',
-    title: 'Vous avez le contrôle !',
-    subtitle: 'Lancez votre premier article dès maintenant',
+    title: 'Votre boutique est prête !',
+    subtitle: 'Photographiez votre premier article dès maintenant',
     description:
-      'Ajoutez vos premiers vêtements ou explorez les données de démonstration pour tester toutes les fonctionnalités de la boutique.',
+      'Votre catalogue est propre. Prenez en photo votre tout premier vêtement pour démarrer.',
     bullets: [
       'Modifier ou supprimer vos articles à tout moment',
       'Accès rapide à ce guide depuis le menu en-tête',
@@ -61,13 +61,74 @@ const ONBOARDING_STEPS = [
   },
 ];
 
+const ONBOARDING_STEPS_EN = [
+  {
+    id: 'welcome',
+    image: '/illustrations/waltr-welcome.jpg',
+    fallbackVariant: 'welcome',
+    badge: 'Welcome',
+    title: 'Meet waltr',
+    subtitle: 'Your intelligent WhatsApp Commerce buddy',
+    description:
+      'waltr is your smart pal helping you organize and manage your WhatsApp boutique on a daily basis.',
+    bullets: [
+      'Simple management built for modern African retail',
+      'Your boutique comes first, waltr is here as your companion',
+    ],
+  },
+  {
+    id: 'catalog',
+    image: '/illustrations/waltr-catalog.jpg',
+    fallbackVariant: 'catalog',
+    badge: 'Snap First',
+    title: 'Snap the garment first',
+    subtitle: 'Photo → Name → FCFA Price → Stock',
+    description:
+      'Snap a photo of your item directly on the rack. Enter its name, selling price in FCFA, and stock in seconds.',
+    bullets: [
+      '1. Clear photo with your phone camera or gallery',
+      '1-click filters: All, In stock, Out of stock',
+    ],
+  },
+  {
+    id: 'whatsapp',
+    image: '/illustrations/waltr-whatsapp.jpg',
+    fallbackVariant: 'whatsapp',
+    badge: 'Automation',
+    title: 'Connected to WhatsApp',
+    subtitle: 'Your customers order with zero friction',
+    description:
+      'Your catalog items are available for your WhatsApp customers 24/7 without sending repeated photos manually.',
+    bullets: [
+      'Zero friction in the customer journey',
+      'Real-time inventory availability sync',
+    ],
+  },
+  {
+    id: 'launch',
+    image: '/illustrations/waltr-launch.jpg',
+    fallbackVariant: 'launch',
+    badge: 'Ready to sell',
+    title: 'Your store is ready!',
+    subtitle: 'Snap your first garment right now',
+    description:
+      'Your catalog is clean. Take a photo of your very first clothing piece to get started.',
+    bullets: [
+      'Edit or delete your items at any time',
+      'Quick access to this guide anytime from the top bar',
+    ],
+  },
+];
+
 export default function OnboardingModal({
   isOpen,
   onClose,
-  onOpenAddModal
+  onOpenAddModal,
+  lang = 'fr'
 }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [imgError, setImgError] = useState(false);
+  const steps = lang === 'en' ? ONBOARDING_STEPS_EN : ONBOARDING_STEPS_FR;
 
   useEffect(() => {
     if (isOpen) {
@@ -99,14 +160,14 @@ export default function OnboardingModal({
 
   if (!isOpen) return null;
 
-  const step = ONBOARDING_STEPS[currentStep];
-  const isLast = currentStep === ONBOARDING_STEPS.length - 1;
+  const step = steps[currentStep];
+  const isLast = currentStep === steps.length - 1;
 
   const handleNext = () => {
     if (isLast) {
       handleComplete();
     } else {
-      setCurrentStep(prev => Math.min(prev + 1, ONBOARDING_STEPS.length - 1));
+      setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
     }
   };
 
@@ -142,7 +203,7 @@ export default function OnboardingModal({
         {/* Top bar with Step Counter and Close */}
         <div className="px-5 pt-4 pb-2 flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            {ONBOARDING_STEPS.map((_, idx) => (
+            {steps.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setCurrentStep(idx)}
@@ -157,7 +218,7 @@ export default function OnboardingModal({
               />
             ))}
             <span className="text-[11px] font-mono text-neutral-400 ml-2">
-              {currentStep + 1}/{ONBOARDING_STEPS.length}
+              {currentStep + 1}/{steps.length}
             </span>
           </div>
 
@@ -224,14 +285,14 @@ export default function OnboardingModal({
               className="px-3 py-2 text-xs font-medium text-neutral-500 hover:text-neutral-900 rounded-lg hover:bg-neutral-100 transition-colors flex items-center gap-1 cursor-pointer"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
-              <span>Précédent</span>
+              <span>{lang === 'en' ? 'Back' : 'Précédent'}</span>
             </button>
           ) : (
             <button
               onClick={handleComplete}
               className="px-3 py-2 text-xs font-medium text-neutral-400 hover:text-neutral-700 transition-colors cursor-pointer"
             >
-              Passer l'intro
+              {lang === 'en' ? 'Skip intro' : "Passer l'intro"}
             </button>
           )}
 
@@ -242,13 +303,14 @@ export default function OnboardingModal({
                 onClick={handleComplete}
                 className="px-3.5 py-2 text-xs font-medium text-neutral-700 hover:text-neutral-950 hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer"
               >
-                Explorer
+                {lang === 'en' ? 'Explore' : 'Explorer'}
               </button>
               <button
                 onClick={handleStartWithAdd}
                 className="px-4 py-2 bg-neutral-950 hover:bg-neutral-800 text-white text-xs font-medium rounded-lg transition-colors shadow-2xs flex items-center gap-1.5 cursor-pointer"
               >
-                <span>Ajouter un article</span>
+                <Camera className="w-3.5 h-3.5 text-orange-400" />
+                <span>{lang === 'en' ? 'Snap first garment' : 'Photographier un habit'}</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -257,7 +319,7 @@ export default function OnboardingModal({
               onClick={handleNext}
               className="px-4 py-2 bg-neutral-950 hover:bg-neutral-800 text-white text-xs font-medium rounded-lg transition-colors shadow-2xs flex items-center gap-1.5 cursor-pointer"
             >
-              <span>Continuer</span>
+              <span>{lang === 'en' ? 'Continue' : 'Continuer'}</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           )}

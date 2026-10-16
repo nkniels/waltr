@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { Lock, Eye, EyeOff, Check, AlertCircle, ShieldCheck, Database } from 'lucide-react';
 import WaltrMascot from './WaltrMascot';
+import { TRANSLATIONS } from '../i18n';
 
 export default function FirstLoginModal({
   isOpen,
   storeProfile,
-  onPasswordCreated
+  onPasswordCreated,
+  lang = 'fr'
 }) {
+  const t = (key) => TRANSLATIONS[lang]?.[key] || TRANSLATIONS['fr']?.[key] || key;
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -20,12 +23,12 @@ export default function FirstLoginModal({
     setError(null);
 
     if (newPassword.length < 4) {
-      setError("Le mot de passe doit comporter au moins 4 caractères.");
+      setError(t('passwordLengthError'));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError("Les deux mots de passe ne correspondent pas.");
+      setError(t('passwordMismatchError'));
       return;
     }
 
@@ -33,7 +36,7 @@ export default function FirstLoginModal({
     try {
       await onPasswordCreated(newPassword);
     } catch (err) {
-      setError(err.message || "Erreur lors de la création du mot de passe.");
+      setError(err.message || "Erreur");
       setIsSubmitting(false);
     }
   };
@@ -48,13 +51,13 @@ export default function FirstLoginModal({
             <WaltrMascot variant="logo" size={54} />
           </div>
           <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium tracking-tight bg-orange-50 text-orange-700 border border-orange-200/60 mb-1.5">
-            Première connexion
+            {t('firstLoginBadge')}
           </span>
           <h2 className="text-lg font-bold tracking-tight text-neutral-950">
-            Définissez votre mot de passe
+            {t('setPasswordTitle')}
           </h2>
           <p className="text-xs text-neutral-500 mt-1 max-w-xs mx-auto">
-            Votre compte boutique a été configuré par l'équipe waltr. Choisissez votre mot de passe personnel pour débloquer votre accès.
+            {t('setPasswordDesc')}
           </p>
         </div>
 
@@ -62,22 +65,22 @@ export default function FirstLoginModal({
         <div className="px-6 pt-4">
           <div className="p-3 bg-neutral-50 border border-neutral-200/60 rounded-xl space-y-1.5 text-xs">
             <div className="flex items-center justify-between text-neutral-600">
-              <span className="font-medium">Boutique :</span>
+              <span className="font-medium">{t('boutiqueLabel')}</span>
               <span className="font-semibold text-neutral-900 truncate max-w-[200px]">
-                {storeProfile?.storeName || 'Boutique WhatsApp'}
+                {storeProfile?.storeName || t('storeDefaultName')}
               </span>
             </div>
             <div className="flex items-center justify-between text-neutral-600">
-              <span className="font-medium">Base de données :</span>
+              <span className="font-medium">{t('databaseLabel')}</span>
               <span className="inline-flex items-center gap-1 font-mono text-[11px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/70">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                 {storeProfile?.databaseId || 'waltr_db_live'}
               </span>
             </div>
             <div className="flex items-center justify-between text-neutral-600">
-              <span className="font-medium">Compte gérant :</span>
+              <span className="font-medium">{t('managerAccountLabel')}</span>
               <span className="font-mono text-[11px] text-neutral-700">
-                {storeProfile?.ownerEmail || 'gérant@boutique.com'}
+                {storeProfile?.ownerEmail || 'gerant@boutique.com'}
               </span>
             </div>
           </div>
@@ -87,7 +90,7 @@ export default function FirstLoginModal({
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
             <label className="block text-xs font-semibold text-neutral-900 mb-1.5">
-              Nouveau mot de passe personnel
+              {t('newPasswordLabel')}
             </label>
             <div className="relative">
               <input
@@ -96,7 +99,7 @@ export default function FirstLoginModal({
                 autoFocus
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Votre mot de passe secret"
+                placeholder={t('newPasswordPlaceholder')}
                 className="w-full pl-3 pr-10 py-2.5 text-xs rounded-lg border border-neutral-200 bg-white focus:border-neutral-950 outline-hidden transition-colors"
               />
               <button
@@ -111,14 +114,14 @@ export default function FirstLoginModal({
 
           <div>
             <label className="block text-xs font-semibold text-neutral-900 mb-1.5">
-              Confirmez le mot de passe
+              {t('confirmPasswordLabel')}
             </label>
             <input
               type={showPassword ? 'text' : 'password'}
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Répétez le mot de passe"
+              placeholder={t('confirmPasswordPlaceholder')}
               className="w-full px-3 py-2.5 text-xs rounded-lg border border-neutral-200 bg-white focus:border-neutral-950 outline-hidden transition-colors"
             />
           </div>
@@ -139,12 +142,12 @@ export default function FirstLoginModal({
               {isSubmitting ? (
                 <>
                   <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Activation du compte...</span>
+                  <span>{t('activatingBtn')}</span>
                 </>
               ) : (
                 <>
                   <Check className="w-4 h-4 text-emerald-400" />
-                  <span>Activer mon accès au tableau de bord</span>
+                  <span>{t('activateAccountBtn')}</span>
                 </>
               )}
             </button>

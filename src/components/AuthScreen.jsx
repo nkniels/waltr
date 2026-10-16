@@ -14,6 +14,7 @@ import {
   Trash2
 } from 'lucide-react';
 import WaltrMascot from './WaltrMascot';
+import { TRANSLATIONS } from '../i18n';
 
 export default function AuthScreen({
   isOpen,
@@ -24,8 +25,10 @@ export default function AuthScreen({
   onLogout,
   isLoggedIn,
   onClearDatabase,
-  onLoadSamples
+  onLoadSamples,
+  lang = 'fr'
 }) {
+  const t = (key) => TRANSLATIONS[lang]?.[key] || TRANSLATIONS['fr']?.[key] || key;
   const [email, setEmail] = useState(storeProfile?.ownerEmail || 'gerant@waltr.app');
   const [password, setPassword] = useState(storeProfile?.temporaryPassword || 'waltr-temp-pass');
   const [copiedLink, setCopiedLink] = useState(false);
@@ -70,10 +73,10 @@ export default function AuthScreen({
             </div>
             <div>
               <h2 className="text-base font-semibold text-neutral-950 tracking-tight">
-                Gestion du Compte & Boutique
+                {t('authModalTitle')}
               </h2>
               <p className="text-[11px] text-neutral-400">
-                Compte marchand & base de données connectée
+                {t('authModalSub')}
               </p>
             </div>
           </div>
@@ -91,12 +94,12 @@ export default function AuthScreen({
           {/* Active Store & Database Card */}
           <div className="p-3.5 bg-neutral-50 rounded-xl border border-neutral-200/70 space-y-2 text-xs">
             <div className="flex items-center justify-between">
-              <span className="text-neutral-500 font-medium">Boutique active :</span>
-              <span className="font-semibold text-neutral-900">{storeProfile?.storeName}</span>
+              <span className="text-neutral-500 font-medium">{t('activeStoreLabel')}</span>
+              <span className="font-semibold text-neutral-900">{storeProfile?.storeName || t('storeDefaultName')}</span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-neutral-500 font-medium">Base de données :</span>
+              <span className="text-neutral-500 font-medium">{t('databaseStatusLabel')}</span>
               <span className="inline-flex items-center gap-1 font-mono text-[11px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/60">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                 {storeProfile?.databaseId}
@@ -104,7 +107,7 @@ export default function AuthScreen({
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-neutral-500 font-medium">Gérant provisionné :</span>
+              <span className="text-neutral-500 font-medium">{t('managerEmailLabel')}</span>
               <span className="font-mono text-neutral-700">{storeProfile?.ownerEmail}</span>
             </div>
           </div>
@@ -114,7 +117,7 @@ export default function AuthScreen({
             <div className="flex items-center justify-between text-xs font-semibold text-neutral-900">
               <span className="flex items-center gap-1.5">
                 <Share2 className="w-3.5 h-3.5 text-orange-500" />
-                <span>Lien d'accès marchand</span>
+                <span>{t('inviteLinkTitle')}</span>
               </span>
               <button
                 type="button"
@@ -124,18 +127,18 @@ export default function AuthScreen({
                 {copiedLink ? (
                   <>
                     <Check className="w-3 h-3 text-emerald-600" />
-                    <span>Lien copié !</span>
+                    <span>{t('copiedLinkBtn')}</span>
                   </>
                 ) : (
                   <>
                     <Copy className="w-3 h-3" />
-                    <span>Copier le lien</span>
+                    <span>{t('copyLinkBtn')}</span>
                   </>
                 )}
               </button>
             </div>
             <p className="text-[11px] text-neutral-500 leading-relaxed">
-              Envoyez ce lien direct au marchand. En l'ouvrant, sa base de données sera automatiquement rattachée et il sera guidé pour créer son mot de passe personnel.
+              {t('inviteLinkDesc')}
             </p>
           </div>
 
@@ -143,33 +146,30 @@ export default function AuthScreen({
           <form onSubmit={handleSignIn} className="space-y-3 pt-1">
             <div>
               <label className="block text-xs font-semibold text-neutral-900 mb-1">
-                Email ou Identifiant Boutique
+                {t('managerEmailLabel')}
               </label>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="fatou@boutique.com"
+                placeholder={t('emailPlaceholder')}
                 className="w-full px-3 py-2 text-xs rounded-lg border border-neutral-200 bg-white focus:border-neutral-950 outline-hidden transition-colors font-mono"
               />
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-neutral-900 mb-1">
-                Mot de passe (temporaire ou personnel)
+                {t('password')}
               </label>
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder={t('passwordPlaceholder')}
                 className="w-full px-3 py-2 text-xs rounded-lg border border-neutral-200 bg-white focus:border-neutral-950 outline-hidden transition-colors font-mono"
               />
-              <p className="mt-1 text-[11px] text-neutral-400">
-                Mot de passe temporaire initial : <code className="bg-neutral-100 text-neutral-700 px-1 py-0.5 rounded font-mono">waltr-temp-pass</code>
-              </p>
             </div>
 
             {error && (
@@ -187,12 +187,12 @@ export default function AuthScreen({
               {isSubmitting ? (
                 <>
                   <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Connexion en cours...</span>
+                  <span>{t('signingInBtn')}</span>
                 </>
               ) : (
                 <>
                   <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Se connecter à cette boutique</span>
+                  <span>{t('signInBtn')}</span>
                 </>
               )}
             </button>
@@ -203,14 +203,14 @@ export default function AuthScreen({
             <div className="flex items-center justify-between text-xs font-semibold text-neutral-900">
               <span className="flex items-center gap-1.5">
                 <Database className="w-3.5 h-3.5 text-neutral-500" />
-                <span>Gestion de la Base</span>
+                <span>{t('databaseMgmtTitle')}</span>
               </span>
               <span className="text-[10px] font-mono text-neutral-400">
                 {storeProfile?.databaseId}
               </span>
             </div>
             <p className="text-[11px] text-neutral-500 leading-relaxed">
-              Conservez votre catalogue dans un état propre pour photographier et ajouter vos articles réels.
+              {t('databaseMgmtDesc')}
             </p>
             <div className="flex items-center gap-2 pt-0.5">
               <button
@@ -220,10 +220,10 @@ export default function AuthScreen({
                   onClose();
                 }}
                 className="flex-1 py-1.5 px-2.5 bg-white hover:bg-neutral-100 text-neutral-800 border border-neutral-200/90 rounded-lg text-xs font-medium transition-colors cursor-pointer shadow-2xs flex items-center justify-center gap-1.5"
-                title="Vider tous les articles pour avoir un catalogue propre"
+                title={t('clearDatabaseBtn')}
               >
                 <Trash2 className="w-3 h-3 text-neutral-400" />
-                <span>Vider la base (État propre)</span>
+                <span>{t('clearDatabaseBtn')}</span>
               </button>
 
               <button
@@ -233,10 +233,10 @@ export default function AuthScreen({
                   onClose();
                 }}
                 className="py-1.5 px-2.5 bg-white hover:bg-neutral-100 text-neutral-600 border border-neutral-200/90 rounded-lg text-xs transition-colors cursor-pointer shadow-2xs flex items-center justify-center gap-1"
-                title="Charger des exemples de test"
+                title={t('loadSamplesBtn')}
               >
                 <Sparkles className="w-3 h-3 text-orange-400" />
-                <span>Exemples</span>
+                <span>{t('loadSamplesBtn')}</span>
               </button>
             </div>
           </div>
@@ -252,7 +252,7 @@ export default function AuthScreen({
               className="text-neutral-500 hover:text-neutral-950 font-medium transition-colors cursor-pointer flex items-center gap-1"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>Accès rapide Démo</span>
+              <span>{t('demoAccessBtn')}</span>
             </button>
 
             {isLoggedIn && (
@@ -264,7 +264,7 @@ export default function AuthScreen({
                 }}
                 className="text-rose-600 hover:text-rose-700 font-medium transition-colors cursor-pointer"
               >
-                Déconnexion
+                {t('logoutBtn')}
               </button>
             )}
           </div>

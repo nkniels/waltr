@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Camera, Plus } from 'lucide-react';
 import WaltrMascot from './WaltrMascot';
+import { TRANSLATIONS } from '../i18n';
 
-export default function EmptyState({ isSearching, searchQuery, onClearSearch, onOpenAddModal }) {
+export default function EmptyState({ isSearching, searchQuery, onClearSearch, onOpenAddModal, lang = 'fr' }) {
   const [imgError, setImgError] = useState(false);
+  const t = (key) => TRANSLATIONS[lang]?.[key] || TRANSLATIONS['fr']?.[key] || key;
 
   if (isSearching) {
     return (
@@ -12,16 +14,16 @@ export default function EmptyState({ isSearching, searchQuery, onClearSearch, on
           <WaltrMascot variant="logo" size={48} className="opacity-40 grayscale" />
         </div>
         <p className="text-sm font-semibold text-neutral-900">
-          Aucun vêtement ne correspond à "{searchQuery}"
+          {t('noResultsTitle')} "{searchQuery}"
         </p>
         <p className="mt-1 text-xs text-neutral-400">
-          Modifiez votre recherche ou réinitialisez le filtre.
+          {t('noResultsDesc')}
         </p>
         <button
           onClick={onClearSearch}
           className="mt-3.5 px-3 py-1.5 text-xs font-medium text-neutral-600 hover:text-neutral-950 bg-neutral-100 hover:bg-neutral-200/80 rounded-lg transition-colors cursor-pointer"
         >
-          Effacer la recherche
+          {t('clearSearch')}
         </button>
       </div>
     );
@@ -44,10 +46,10 @@ export default function EmptyState({ isSearching, searchQuery, onClearSearch, on
         )}
       </div>
       <h3 className="text-sm font-bold text-neutral-950">
-        Votre catalogue est vide
+        {t('emptyCatalogTitle')}
       </h3>
       <p className="mt-1 text-xs text-neutral-400 max-w-xs mx-auto leading-relaxed">
-        Prenez en photo votre premier vêtement pour l'ajouter à votre boutique WhatsApp.
+        {t('emptyCatalogDesc')}
       </p>
       
       <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-2">
@@ -56,18 +58,18 @@ export default function EmptyState({ isSearching, searchQuery, onClearSearch, on
           className="inline-flex items-center gap-2 px-4 py-2.5 bg-neutral-950 hover:bg-neutral-800 text-white text-xs font-medium rounded-xl transition-all cursor-pointer shadow-2xs hover:shadow-xs"
         >
           <Camera className="w-4 h-4 text-orange-400" />
-          <span>Photographier mon premier article</span>
+          <span>{t('snapFirstItem')}</span>
         </button>
       </div>
 
       <div className="mt-4 inline-flex items-center gap-1.5 text-[11px] font-mono text-neutral-400 bg-neutral-50 px-3 py-1 rounded-full border border-neutral-100">
-        <span className="text-orange-500 font-semibold">1. Photo</span>
+        <span className="text-orange-500 font-semibold">{t('step1')}</span>
         <span>→</span>
-        <span>2. Nom</span>
+        <span>{t('step2')}</span>
         <span>→</span>
-        <span>3. Prix FCFA</span>
+        <span>{t('step3')}</span>
         <span>→</span>
-        <span>4. Stock</span>
+        <span>{t('step4')}</span>
       </div>
     </div>
   );

@@ -1,14 +1,18 @@
 import React from 'react';
 import { Trash2, X } from 'lucide-react';
 import { formatFCFA } from '../utils/formatters';
+import { TRANSLATIONS } from '../i18n';
 
 export default function DeleteConfirmModal({
   isOpen,
   onClose,
   onConfirm,
   article = null,
-  isDeleting = false
+  isDeleting = false,
+  lang = 'fr'
 }) {
+  const t = (key) => TRANSLATIONS[lang]?.[key] || TRANSLATIONS['fr']?.[key] || key;
+
   if (!isOpen || !article) return null;
 
   return (
@@ -21,7 +25,7 @@ export default function DeleteConfirmModal({
       <div className="relative bg-white w-full sm:max-w-sm rounded-t-2xl sm:rounded-2xl border border-neutral-200/80 shadow-xl overflow-hidden z-10 animate-slide-up sm:animate-fade-in p-5">
         <div className="flex items-start justify-between">
           <h3 className="text-sm font-semibold text-neutral-950 tracking-tight">
-            Supprimer l'article
+            {t('deleteTitle')}
           </h3>
           <button
             onClick={onClose}
@@ -33,7 +37,7 @@ export default function DeleteConfirmModal({
         </div>
 
         <p className="mt-2 text-xs text-neutral-500 leading-relaxed">
-          Êtes-vous sûr de vouloir retirer <span className="font-medium text-neutral-900">"{article.nom}"</span> du catalogue ? Cette action est irréversible.
+          {t('deleteDesc')}
         </p>
 
         {/* Minimal Item Preview */}
@@ -54,7 +58,7 @@ export default function DeleteConfirmModal({
             disabled={isDeleting}
             className="px-3.5 py-2 rounded-lg text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 text-xs font-medium transition-colors cursor-pointer disabled:opacity-50"
           >
-            Annuler
+            {t('cancelBtn')}
           </button>
           <button
             type="button"
@@ -65,12 +69,12 @@ export default function DeleteConfirmModal({
             {isDeleting ? (
               <>
                 <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                <span>Suppression...</span>
+                <span>{t('deletingBtn')}</span>
               </>
             ) : (
               <>
                 <Trash2 className="w-3.5 h-3.5" />
-                <span>Supprimer</span>
+                <span>{t('deleteBtn')}</span>
               </>
             )}
           </button>

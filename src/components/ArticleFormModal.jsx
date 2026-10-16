@@ -11,14 +11,17 @@ import {
 } from 'lucide-react';
 import { formatFCFA, validateArticleForm } from '../utils/formatters';
 import { compressImageFile } from '../utils/imageCompressor';
+import { TRANSLATIONS } from '../i18n';
 
 export default function ArticleFormModal({
   isOpen,
   onClose,
   onSubmit,
   articleToEdit = null,
-  isSubmitting = false
+  isSubmitting = false,
+  lang = 'fr'
 }) {
+  const t = (key) => TRANSLATIONS[lang]?.[key] || TRANSLATIONS['fr']?.[key] || key;
   const isEditing = Boolean(articleToEdit);
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
@@ -129,10 +132,10 @@ export default function ArticleFormModal({
         <div className="px-5 py-4 border-b border-neutral-100 flex items-center justify-between shrink-0">
           <div>
             <h2 className="text-base font-semibold text-neutral-950 tracking-tight">
-              {isEditing ? "Modifier l'article" : "Prendre en photo & Ajouter"}
+              {isEditing ? t('editArticleTitle') : t('newArticleTitle')}
             </h2>
             <p className="text-xs text-neutral-400 mt-0.5">
-              1. Photo de l'habit → 2. Nom → 3. Prix FCFA → 4. Stock
+              {t('step1')} → {t('step2')} → {t('step3')} → {t('step4')}
             </p>
           </div>
           
@@ -152,10 +155,10 @@ export default function ArticleFormModal({
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-xs font-semibold text-neutral-900 flex items-center gap-1.5">
                 <span className="w-4 h-4 rounded-full bg-neutral-950 text-white text-[10px] flex items-center justify-center font-mono">1</span>
-                <span>Photo du vêtement</span>
+                <span>{t('stepPhotoTitle')}</span>
               </label>
               <span className="text-[11px] text-neutral-400">
-                {formData.image ? "Photo enregistrée" : "Recommandé pour WhatsApp"}
+                {formData.image ? t('photoCaptured') : "WhatsApp"}
               </span>
             </div>
 
@@ -193,19 +196,19 @@ export default function ArticleFormModal({
                     className="px-3 py-1.5 bg-white text-neutral-900 text-xs font-medium rounded-lg shadow-sm hover:bg-neutral-100 transition-colors flex items-center gap-1.5 cursor-pointer"
                   >
                     <Camera className="w-3.5 h-3.5" />
-                    <span>Reprendre</span>
+                    <span>{t('retakePhoto')}</span>
                   </button>
                   <button
                     type="button"
                     onClick={handleRemovePhoto}
                     className="px-3 py-1.5 bg-rose-600 text-white text-xs font-medium rounded-lg shadow-sm hover:bg-rose-700 transition-colors cursor-pointer"
                   >
-                    Supprimer
+                    {t('cancelBtn')}
                   </button>
                 </div>
 
                 <div className="absolute bottom-2 right-2 bg-neutral-950/70 text-white text-[10px] px-2 py-0.5 rounded-md backdrop-blur-xs font-mono">
-                  Photo prête
+                  {t('photoCaptured')}
                 </div>
               </div>
             ) : (
@@ -213,7 +216,7 @@ export default function ArticleFormModal({
                 {isProcessingPhoto ? (
                   <div className="py-4 flex flex-col items-center justify-center gap-2 text-neutral-500 text-xs">
                     <RefreshCw className="w-5 h-5 animate-spin text-neutral-900" />
-                    <span>Traitement de la photo...</span>
+                    <span>{t('saving')}</span>
                   </div>
                 ) : (
                   <div>
@@ -225,7 +228,7 @@ export default function ArticleFormModal({
                         className="px-4 py-2.5 bg-neutral-950 hover:bg-neutral-800 text-white rounded-xl text-xs font-medium flex items-center gap-2 shadow-2xs transition-all active:scale-95 cursor-pointer"
                       >
                         <Camera className="w-4 h-4 text-orange-400" />
-                        <span>Prendre une photo (Appareil)</span>
+                        <span>{t('takePhoto')}</span>
                       </button>
 
                       {/* Pick from gallery */}
@@ -233,15 +236,15 @@ export default function ArticleFormModal({
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
                         className="px-3 py-2.5 bg-white hover:bg-neutral-100 border border-neutral-200 text-neutral-700 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
-                        title="Importer depuis vos fichiers"
+                        title="Importer"
                       >
                         <Upload className="w-3.5 h-3.5" />
-                        <span className="hidden xs:inline">Galerie</span>
+                        <span className="hidden xs:inline">{t('chooseGallery')}</span>
                       </button>
                     </div>
 
                     <p className="text-[11px] text-neutral-400">
-                      Photographiez le vêtement sur cintre ou porté. La photo sera synchronisée avec votre catalogue WhatsApp.
+                      {t('stepPhotoSub')}
                     </p>
                   </div>
                 )}
@@ -260,7 +263,7 @@ export default function ArticleFormModal({
           <div>
             <label className="block text-xs font-semibold text-neutral-900 mb-1.5 flex items-center gap-1.5">
               <span className="w-4 h-4 rounded-full bg-neutral-950 text-white text-[10px] flex items-center justify-center font-mono">2</span>
-              <span>Nom du vêtement / article <span className="text-neutral-400">*</span></span>
+              <span>{t('stepNameTitle')} <span className="text-neutral-400">*</span></span>
             </label>
             <input
               type="text"
@@ -268,7 +271,7 @@ export default function ArticleFormModal({
               value={formData.nom}
               onChange={(e) => handleChange('nom', e.target.value)}
               onBlur={() => handleBlur('nom')}
-              placeholder="ex: Chemise Lin Blanche Col Mao"
+              placeholder={t('stepNamePlaceholder')}
               className={`w-full px-3 py-2 text-sm rounded-lg border bg-white outline-hidden transition-colors ${
                 errors.nom && touched.nom
                   ? 'border-rose-300 focus:border-rose-500'
@@ -288,7 +291,7 @@ export default function ArticleFormModal({
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-xs font-semibold text-neutral-900 flex items-center gap-1.5">
                 <span className="w-4 h-4 rounded-full bg-neutral-950 text-white text-[10px] flex items-center justify-center font-mono">3</span>
-                <span>Prix (en FCFA) <span className="text-neutral-400">*</span></span>
+                <span>{t('stepPriceTitle')} <span className="text-neutral-400">*</span></span>
               </label>
               {formData.prix && !isNaN(Number(formData.prix)) && (
                 <span className="text-xs font-mono font-medium text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded">
@@ -328,7 +331,7 @@ export default function ArticleFormModal({
           <div>
             <label className="block text-xs font-semibold text-neutral-900 mb-1.5 flex items-center gap-1.5">
               <span className="w-4 h-4 rounded-full bg-neutral-950 text-white text-[10px] flex items-center justify-center font-mono">4</span>
-              <span>Quantité en stock <span className="text-neutral-400">*</span></span>
+              <span>{t('stepStockTitle')} <span className="text-neutral-400">*</span></span>
             </label>
             <input
               type="number"
@@ -338,7 +341,7 @@ export default function ArticleFormModal({
               value={formData.stock}
               onChange={(e) => handleChange('stock', e.target.value)}
               onBlur={() => handleBlur('stock')}
-              placeholder="ex: 8 (ou 0 pour rupture)"
+              placeholder="ex: 8"
               className={`w-full px-3 py-2 text-sm rounded-lg border bg-white outline-hidden font-mono transition-colors ${
                 errors.stock && touched.stock
                   ? 'border-rose-300 focus:border-rose-500'
@@ -352,7 +355,7 @@ export default function ArticleFormModal({
               </p>
             ) : (
               <p className="mt-1 text-[11px] text-neutral-400">
-                0 indiquera automatiquement la mention "Épuisé" aux clients WhatsApp.
+                {t('stepStockSub')}
               </p>
             )}
           </div>
@@ -365,7 +368,7 @@ export default function ArticleFormModal({
               disabled={isSubmitting}
               className="px-3.5 py-2 rounded-lg text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 text-xs font-medium transition-colors cursor-pointer disabled:opacity-50"
             >
-              Annuler
+              {t('cancelBtn')}
             </button>
             <button
               type="submit"
@@ -375,12 +378,12 @@ export default function ArticleFormModal({
               {isSubmitting ? (
                 <>
                   <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Enregistrement...</span>
+                  <span>{isEditing ? t('updating') : t('saving')}</span>
                 </>
               ) : (
                 <>
                   <Check className="w-3.5 h-3.5" />
-                  <span>{isEditing ? "Enregistrer les modifications" : "Publier l'article"}</span>
+                  <span>{isEditing ? t('saveToStore') : t('saveToStore')}</span>
                 </>
               )}
             </button>
