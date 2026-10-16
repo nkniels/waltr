@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "waltr",
     "public": "dist",
     "ignore": [
       "firebase.json",
