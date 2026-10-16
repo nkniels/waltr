@@ -5,8 +5,11 @@ import {
   Plus, 
   Settings, 
   LogOut, 
-  RefreshCw
+  RefreshCw,
+  HelpCircle,
+  Sparkles
 } from 'lucide-react';
+import WaltrMascot from './WaltrMascot';
 
 export default function Header({
   articles = [],
@@ -14,6 +17,7 @@ export default function Header({
   onSearchChange,
   onOpenAddModal,
   onOpenAuthModal,
+  onOpenOnboarding,
   isMockMode,
   token,
   apiUrl,
@@ -32,16 +36,22 @@ export default function Header({
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         {/* Top Navbar */}
         <div className="h-14 flex items-center justify-between gap-4">
-          {/* Brand */}
+          {/* Brand with waltr mascot logo */}
           <div className="flex items-center gap-3">
-            <a 
-              href="#" 
-              className="text-lg font-semibold tracking-tight text-neutral-950 hover:opacity-80 transition-opacity flex items-center gap-1.5"
+            <button 
+              onClick={onOpenOnboarding}
+              className="group flex items-center gap-2 hover:opacity-85 transition-opacity cursor-pointer text-left"
+              title="Ouvrir le guide waltr"
             >
-              <span className="w-2 h-2 rounded-full bg-neutral-950 inline-block"></span>
-              waltr
-            </a>
+              <div className="w-8 h-8 rounded-full bg-white border border-neutral-200 shadow-2xs flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
+                <WaltrMascot variant="logo" size={26} />
+              </div>
+              <span className="text-lg font-bold tracking-tight text-neutral-950">
+                waltr
+              </span>
+            </button>
 
+            {/* Mode badge */}
             <button
               onClick={onOpenAuthModal}
               className="group inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-mono tracking-tight border transition-colors cursor-pointer text-neutral-600 border-neutral-200 hover:border-neutral-300 hover:text-neutral-900 bg-white"
@@ -55,7 +65,17 @@ export default function Header({
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1 sm:gap-1.5">
+            {/* Guide / Onboarding button */}
+            <button
+              onClick={onOpenOnboarding}
+              className="p-2 text-neutral-500 hover:text-neutral-950 hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer flex items-center gap-1 text-xs font-medium"
+              title="Guide & Présentation de waltr"
+            >
+              <Sparkles className="w-4 h-4 text-orange-500" />
+              <span className="hidden md:inline text-neutral-600">Guide</span>
+            </button>
+
             <button
               onClick={onRefresh}
               disabled={loading}

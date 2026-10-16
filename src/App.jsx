@@ -13,6 +13,7 @@ import DeleteConfirmModal from './components/DeleteConfirmModal';
 import AuthScreen from './components/AuthScreen';
 import EmptyState from './components/EmptyState';
 import Toast from './components/Toast';
+import OnboardingModal from './components/OnboardingModal';
 
 export default function App() {
   const [articles, setArticles] = useState([]);
@@ -30,6 +31,15 @@ export default function App() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  // Onboarding state: automatically opens for first-time visitors
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(() => {
+    try {
+      return !localStorage.getItem('waltr_onboarding_completed');
+    } catch (e) {
+      return true;
+    }
+  });
 
   // Toast state
   const [toast, setToast] = useState(null);
@@ -165,6 +175,7 @@ export default function App() {
         onSearchChange={setSearchQuery}
         onOpenAddModal={handleOpenAdd}
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
+        onOpenOnboarding={() => setIsOnboardingOpen(true)}
         isMockMode={isMockMode}
         token={token}
         apiUrl={apiUrl}
@@ -213,9 +224,14 @@ export default function App() {
             </span>
           </div>
 
-          <span className="text-[11px] text-neutral-400 font-mono">
-            WhatsApp Commerce
-          </span>
+          <button
+            onClick={() => setIsOnboardingOpen(true)}
+            className="text-[11px] text-neutral-400 hover:text-neutral-700 font-mono transition-colors cursor-pointer flex items-center gap-1"
+            title="Revoir la présentation"
+          >
+            <span>waltr commerce</span>
+            <span className="text-[10px]">✨</span>
+          </button>
         </div>
 
         {/* Loading Skeletons */}
@@ -275,6 +291,13 @@ export default function App() {
           <span>Nouvel article</span>
         </button>
       </div>
+
+      {/* Onboarding Experience Modal */}
+      <OnboardingModal
+        isOpen={isOnboardingOpen}
+        onClose={() => setIsOnboardingOpen(false)}
+        onOpenAddModal={handleOpenAdd}
+      />
 
       {/* Modals */}
       <ArticleFormModal
