@@ -33,7 +33,7 @@ export default function EmptyState({ isSearching, searchQuery, onClearSearch, on
         Votre catalogue est vide
       </h3>
       <p className="mt-1 text-xs text-slate-500 max-w-sm mx-auto">
-        Commencez par ajouter votre premier habit ou vêtement pour qu'il soit disponible dans votre boutique WhatsApp.
+        Commencez par ajouter votre premier habit ou vêtement pour qu'il soit disponible sur waltr et votre boutique WhatsApp.
       </p>
       <button
         onClick={onOpenAddModal}

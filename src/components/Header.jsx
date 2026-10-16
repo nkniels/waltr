@@ -45,7 +45,7 @@ export default function Header({
               API Connectée ({apiUrl.replace(/https?:\/\//, '')})
             </span>
           )}
-          <span className="hidden sm:inline text-slate-400">• Vente WhatsApp Commerce</span>
+          <span className="hidden sm:inline text-slate-400">• waltr WhatsApp Commerce</span>
         </div>
 
         <div className="flex items-center gap-3">
@@ -75,18 +75,18 @@ export default function Header({
         <div className="flex items-center justify-between gap-3">
           {/* Brand & Title */}
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white shadow-sm shrink-0">
-              <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6" />
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white shadow-sm shrink-0 font-black text-lg">
+              w
             </div>
             <div className="min-w-0">
-              <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight truncate flex items-center gap-2">
-                Catalogue Boutique
-                <span className="text-[10px] font-semibold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight truncate flex items-center gap-2">
+                waltr
+                <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded tracking-wide uppercase">
                   Admin
                 </span>
               </h1>
               <p className="text-xs text-slate-500 truncate">
-                Gérez facilement vos articles, prix FCFA et stocks
+                Catalogue WhatsApp Commerce • Prix FCFA & stocks
               </p>
             </div>
           </div>

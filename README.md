@@ -1,6 +1,6 @@
-# Dashboard Boutique WhatsApp Commerce
+# waltr — Dashboard WhatsApp Commerce
 
-Tableau de bord d'administration pour la gestion du catalogue d'articles de vêtements (Projet WhatsApp Commerce).
+Tableau de bord d'administration pour la gestion de catalogue et stock WhatsApp Commerce (waltr).
 
 > **Mission :** Permettre au propriétaire de la boutique de gérer facilement son catalogue d'habits avec 1 liste et 3 actions principales : **Ajouter**, **Modifier**, **Supprimer**.
 

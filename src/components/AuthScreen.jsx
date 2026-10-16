@@ -95,10 +95,10 @@ export default function AuthScreen({
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-900">
-                Connexion Propriétaire Boutique
+                Connexion waltr — Propriétaire
               </h2>
               <p className="text-[11px] text-slate-500">
-                Accès sécurisé au catalogue WhatsApp Commerce
+                Accès sécurisé au catalogue waltr WhatsApp Commerce
               </p>
             </div>
           </div>
