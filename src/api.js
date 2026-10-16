@@ -11,8 +11,8 @@
 
 const DEFAULT_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-// Données initiales réalistes pour la boutique WhatsApp avec vraies photos d'articles
-const INITIAL_MOCK_ARTICLES = [
+// Données initiales : État propre (clean state) sans faux articles par défaut
+const SAMPLE_MOCK_ARTICLES = [
   {
     id: 1,
     nom: "Robe Wax Moderne Africaine",
@@ -30,60 +30,45 @@ const INITIAL_MOCK_ARTICLES = [
     category: "Homme",
     color: "Blanc",
     image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 3,
-    nom: "Ensemble Bazin Riche Brodé",
-    prix: 45000,
-    stock: 0, // Rupture de stock
-    category: "Traditionnel",
-    color: "Bleu nuit",
-    image: "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 4,
-    nom: "T-shirt Coton Bio Basique",
-    prix: 5000,
-    stock: 15,
-    category: "Unisex",
-    color: "Noir",
-    image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 5,
-    nom: "Jupe Plissée Wax Colorée",
-    prix: 9500,
-    stock: 2, // Stock faible
-    category: "Femme",
-    color: "Jaune / Motif",
-    image: "https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 6,
-    nom: "Pantalon Chino Ajusté",
-    prix: 14000,
-    stock: 0, // Rupture de stock
-    category: "Homme",
-    color: "Beige",
-    image: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=600&q=80"
   }
 ];
 
-function getLocalMockArticles() {
-  const saved = localStorage.getItem('waltr_shop_articles');
-  if (saved) {
+// Nettoyage automatique des anciennes données de démo pour garantir un état propre
+function purgeLegacyMockArticles() {
+  if (typeof window === 'undefined') return;
+  try {
+    const isCleaned = localStorage.getItem('waltr_clean_init_v3');
+    if (!isCleaned) {
+      // Purge les anciens articles factices mis en cache lors des versions précédentes
+      localStorage.removeItem('waltr_shop_articles');
+      localStorage.setItem('waltr_clean_init_v3', 'true');
+    }
+  } catch (e) {
+    // ignore
+  }
+}
+
+purgeLegacyMockArticles();
+
+function getLocalArticles(databaseId = 'live') {
+  if (typeof window === 'undefined') return [];
+  const key = `waltr_db_articles_${databaseId}`;
+  const saved = localStorage.getItem(key);
+  if (saved !== null) {
     try {
       return JSON.parse(saved);
     } catch (e) {
-      console.error('Erreur lecture mock articles:', e);
+      console.error('Erreur lecture articles base:', e);
     }
   }
-  localStorage.setItem('waltr_shop_articles', JSON.stringify(INITIAL_MOCK_ARTICLES));
-  return INITIAL_MOCK_ARTICLES;
+  // Par défaut : état propre (0 articles) pour toute nouvelle base ou boutique
+  return [];
 }
 
-function saveLocalMockArticles(articles) {
-  localStorage.setItem('waltr_shop_articles', JSON.stringify(articles));
+function saveLocalArticles(databaseId, articles) {
+  if (typeof window === 'undefined') return;
+  const key = `waltr_db_articles_${databaseId || 'live'}`;
+  localStorage.setItem(key, JSON.stringify(articles));
 }
 
 export class ApiService {
@@ -104,6 +89,10 @@ export class ApiService {
     this.checkInviteUrlParams();
   }
 
+  getCurrentDatabaseId() {
+    return this.storeProfile?.databaseId || 'live';
+  }
+
   loadStoreProfile() {
     const saved = localStorage.getItem('waltr_store_profile');
     if (saved) {
@@ -113,16 +102,16 @@ export class ApiService {
         console.error('Erreur store profile:', e);
       }
     }
-    // Default provisioned store
+    // Boutique par défaut propre (clean state)
     const defaultStore = {
-      storeName: "Boutique Wax & Élégance",
-      ownerEmail: "fatou@boutique.com",
-      phone: "+225 07 00 00 00",
-      databaseId: "waltr_db_84920",
+      storeName: "Ma Boutique",
+      ownerEmail: "gerant@waltr.app",
+      phone: "+225 00 00 00 00",
+      databaseId: "waltr_db_live",
       databaseStatus: "Connectée",
       temporaryPassword: "waltr-temp-pass",
       passwordHash: "",
-      mustChangePassword: true,
+      mustChangePassword: false,
       provisionedAt: "2026-10-16",
     };
     localStorage.setItem('waltr_store_profile', JSON.stringify(defaultStore));
@@ -139,7 +128,7 @@ export class ApiService {
   }
 
   /**
-   * Check if user opened an invite link, e.g.:
+   * Détecte les liens d'invitation marchand provisionnés, ex :
    * https://waltr.web.app/?store=Boutique+Mariama&email=mariama@shop.com&db=db_mariama_01
    */
   checkInviteUrlParams() {
@@ -149,17 +138,24 @@ export class ApiService {
     const emailParam = urlParams.get('email');
     const dbParam = urlParams.get('db') || urlParams.get('database');
 
-    if (storeParam || emailParam) {
+    if (storeParam || emailParam || dbParam) {
+      const dbId = dbParam ? decodeURIComponent(dbParam) : `waltr_db_${Date.now().toString().slice(-5)}`;
       const updatedProfile = {
         storeName: storeParam ? decodeURIComponent(storeParam) : this.storeProfile.storeName,
         ownerEmail: emailParam ? decodeURIComponent(emailParam) : this.storeProfile.ownerEmail,
-        databaseId: dbParam ? decodeURIComponent(dbParam) : `waltr_db_${Date.now().toString().slice(-5)}`,
+        databaseId: dbId,
         databaseStatus: "Connectée",
         mustChangePassword: true,
       };
       this.saveStoreProfile(updatedProfile);
       this.mustChangePassword = true;
       localStorage.setItem('waltr_must_change_password', 'true');
+
+      // S'assure que la nouvelle base attribuée démarre dans un état propre (vide)
+      const dbKey = `waltr_db_articles_${dbId}`;
+      if (!localStorage.getItem(dbKey)) {
+        localStorage.setItem(dbKey, JSON.stringify([]));
+      }
     }
   }
 
@@ -320,12 +316,13 @@ export class ApiService {
   }
 
   /**
-   * GET /api/articles/
+   * GET /api/articles/ (Isolé par base de données pour chaque boutique)
    */
   async getArticles(searchQuery = '') {
     if (this.isMockMode) {
-      await new Promise(r => setTimeout(r, 120));
-      let items = getLocalMockArticles();
+      await new Promise(r => setTimeout(r, 100));
+      const dbId = this.getCurrentDatabaseId();
+      let items = getLocalArticles(dbId);
       if (searchQuery) {
         const q = searchQuery.toLowerCase().trim();
         items = items.filter(a => a.nom.toLowerCase().includes(q));
@@ -370,14 +367,15 @@ export class ApiService {
     };
 
     if (this.isMockMode) {
-      await new Promise(r => setTimeout(r, 180));
-      const items = getLocalMockArticles();
+      await new Promise(r => setTimeout(r, 150));
+      const dbId = this.getCurrentDatabaseId();
+      const items = getLocalArticles(dbId);
       const newArticle = {
         id: Date.now(),
         ...payload,
       };
       const updated = [newArticle, ...items];
-      saveLocalMockArticles(updated);
+      saveLocalArticles(dbId, updated);
       return newArticle;
     }
 
@@ -413,15 +411,16 @@ export class ApiService {
     };
 
     if (this.isMockMode) {
-      await new Promise(r => setTimeout(r, 180));
-      const items = getLocalMockArticles();
+      await new Promise(r => setTimeout(r, 150));
+      const dbId = this.getCurrentDatabaseId();
+      const items = getLocalArticles(dbId);
       const index = items.findIndex(a => a.id === id);
       if (index === -1) {
         throw new Error("Article introuvable dans le catalogue.");
       }
       const updatedArticle = { ...items[index], ...payload };
       items[index] = updatedArticle;
-      saveLocalMockArticles(items);
+      saveLocalArticles(dbId, items);
       return updatedArticle;
     }
 
@@ -449,10 +448,11 @@ export class ApiService {
    */
   async deleteArticle(id) {
     if (this.isMockMode) {
-      await new Promise(r => setTimeout(r, 120));
-      const items = getLocalMockArticles();
+      await new Promise(r => setTimeout(r, 100));
+      const dbId = this.getCurrentDatabaseId();
+      const items = getLocalArticles(dbId);
       const filtered = items.filter(a => a.id !== id);
-      saveLocalMockArticles(filtered);
+      saveLocalArticles(dbId, filtered);
       return { success: true, id };
     }
 
@@ -473,9 +473,27 @@ export class ApiService {
     }
   }
 
+  /**
+   * Remet la base de données dans un état propre (clean state = 0 articles)
+   */
+  clearDatabase() {
+    const dbId = this.getCurrentDatabaseId();
+    saveLocalArticles(dbId, []);
+    return [];
+  }
+
+  /**
+   * Charge des exemples de test optionnels si demandé par l'utilisateur
+   */
+  loadSampleArticles() {
+    const dbId = this.getCurrentDatabaseId();
+    const samples = SAMPLE_MOCK_ARTICLES.map(a => ({ ...a, id: Date.now() + Math.random() }));
+    saveLocalArticles(dbId, samples);
+    return samples;
+  }
+
   resetMockData() {
-    localStorage.removeItem('waltr_shop_articles');
-    return INITIAL_MOCK_ARTICLES;
+    return this.clearDatabase();
   }
 }
 

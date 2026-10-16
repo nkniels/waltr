@@ -39,14 +39,8 @@ export default function App() {
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  // Onboarding state
-  const [isOnboardingOpen, setIsOnboardingOpen] = useState(() => {
-    try {
-      return !localStorage.getItem('waltr_onboarding_completed');
-    } catch (e) {
-      return false;
-    }
-  });
+  // Onboarding state : ouvert sur demande via le bouton "Guide" pour un état initial épuré
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
   // Toast state
   const [toast, setToast] = useState(null);
@@ -171,6 +165,20 @@ export default function App() {
     api.logout();
     setIsLoggedIn(false);
     showToast("Déconnexion réussie.", "info");
+  };
+
+  // Remise à l'état propre (0 articles)
+  const handleClearDatabase = () => {
+    api.clearDatabase();
+    setArticles([]);
+    showToast("Base de données réinitialisée. Votre catalogue est maintenant vide et propre.", "info");
+  };
+
+  // Chargement d'articles exemples de test (optionnel)
+  const handleLoadSamples = () => {
+    const samples = api.loadSampleArticles();
+    setArticles(samples);
+    showToast("Exemples de test chargés dans votre base.");
   };
 
   // Filter articles based on active filter
@@ -350,6 +358,8 @@ export default function App() {
         onDemoLogin={handleDemoLogin}
         onLogout={handleLogout}
         isLoggedIn={isLoggedIn}
+        onClearDatabase={handleClearDatabase}
+        onLoadSamples={handleLoadSamples}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Camera, Plus } from 'lucide-react';
 import WaltrMascot from './WaltrMascot';
 
 export default function EmptyState({ isSearching, searchQuery, onClearSearch, onOpenAddModal }) {
@@ -46,16 +46,29 @@ export default function EmptyState({ isSearching, searchQuery, onClearSearch, on
       <h3 className="text-sm font-bold text-neutral-950">
         Votre catalogue est vide
       </h3>
-      <p className="mt-1 text-xs text-neutral-400 max-w-xs mx-auto">
-        Ajoutez votre premier vêtement pour qu'il soit disponible immédiatement sur WhatsApp.
+      <p className="mt-1 text-xs text-neutral-400 max-w-xs mx-auto leading-relaxed">
+        Prenez en photo votre premier vêtement pour l'ajouter à votre boutique WhatsApp.
       </p>
-      <button
-        onClick={onOpenAddModal}
-        className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-neutral-950 hover:bg-neutral-800 text-white text-xs font-medium rounded-lg transition-colors cursor-pointer shadow-2xs"
-      >
-        <Plus className="w-3.5 h-3.5" />
-        <span>Ajouter mon premier article</span>
-      </button>
+      
+      <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-2">
+        <button
+          onClick={onOpenAddModal}
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-neutral-950 hover:bg-neutral-800 text-white text-xs font-medium rounded-xl transition-all cursor-pointer shadow-2xs hover:shadow-xs"
+        >
+          <Camera className="w-4 h-4 text-orange-400" />
+          <span>Photographier mon premier article</span>
+        </button>
+      </div>
+
+      <div className="mt-4 inline-flex items-center gap-1.5 text-[11px] font-mono text-neutral-400 bg-neutral-50 px-3 py-1 rounded-full border border-neutral-100">
+        <span className="text-orange-500 font-semibold">1. Photo</span>
+        <span>→</span>
+        <span>2. Nom</span>
+        <span>→</span>
+        <span>3. Prix FCFA</span>
+        <span>→</span>
+        <span>4. Stock</span>
+      </div>
     </div>
   );
 }
