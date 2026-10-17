@@ -29,8 +29,8 @@ export default function AuthScreen({
   lang = 'fr'
 }) {
   const t = (key) => TRANSLATIONS[lang]?.[key] || TRANSLATIONS['fr']?.[key] || key;
-  const [email, setEmail] = useState(storeProfile?.ownerEmail || 'gerant@waltr.app');
-  const [password, setPassword] = useState(storeProfile?.temporaryPassword || 'waltr-temp-pass');
+  const [email, setEmail] = useState(storeProfile?.ownerEmail || 'gerant@walter.app');
+  const [password, setPassword] = useState(storeProfile?.temporaryPassword || 'walter-temp-pass');
   const [copiedLink, setCopiedLink] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -52,7 +52,7 @@ export default function AuthScreen({
     }
   };
 
-  const inviteUrl = `${window.location.origin}/?store=${encodeURIComponent(storeProfile?.storeName || 'Ma Boutique')}&email=${encodeURIComponent(storeProfile?.ownerEmail || 'client@shop.com')}&db=${encodeURIComponent(storeProfile?.databaseId || 'waltr_db_live')}`;
+  const inviteUrl = `${window.location.origin}/?store=${encodeURIComponent(storeProfile?.storeName || 'Ma Boutique')}&email=${encodeURIComponent(storeProfile?.ownerEmail || 'client@shop.com')}&db=${encodeURIComponent(storeProfile?.databaseId || 'walter_db_live')}`;
 
   const handleCopyInviteLink = () => {
     navigator.clipboard.writeText(inviteUrl);

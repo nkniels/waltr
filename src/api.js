@@ -105,11 +105,11 @@ export class ApiService {
     // Boutique par défaut propre (clean state)
     const defaultStore = {
       storeName: "Ma Boutique",
-      ownerEmail: "gerant@waltr.app",
+      ownerEmail: "gerant@walter.app",
       phone: "+225 00 00 00 00",
-      databaseId: "waltr_db_live",
+      databaseId: "walter_db_live",
       databaseStatus: "Connectée",
-      temporaryPassword: "waltr-temp-pass",
+      temporaryPassword: "walter-temp-pass",
       passwordHash: "",
       mustChangePassword: false,
       provisionedAt: "2026-10-16",
@@ -139,7 +139,7 @@ export class ApiService {
     const dbParam = urlParams.get('db') || urlParams.get('database');
 
     if (storeParam || emailParam || dbParam) {
-      const dbId = dbParam ? decodeURIComponent(dbParam) : `waltr_db_${Date.now().toString().slice(-5)}`;
+      const dbId = dbParam ? decodeURIComponent(dbParam) : `walter_db_${Date.now().toString().slice(-5)}`;
       const updatedProfile = {
         storeName: storeParam ? decodeURIComponent(storeParam) : this.storeProfile.storeName,
         ownerEmail: emailParam ? decodeURIComponent(emailParam) : this.storeProfile.ownerEmail,

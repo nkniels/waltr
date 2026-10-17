@@ -74,7 +74,7 @@ export default function FirstLoginModal({
               <span className="font-medium">{t('databaseLabel')}</span>
               <span className="inline-flex items-center gap-1 font-mono text-[11px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/70">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                {storeProfile?.databaseId || 'waltr_db_live'}
+                {storeProfile?.databaseId || 'walter_db_live'}
               </span>
             </div>
             <div className="flex items-center justify-between text-neutral-600">

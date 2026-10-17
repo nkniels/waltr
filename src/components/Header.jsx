@@ -55,7 +55,7 @@ export default function Header({
                 </div>
                 <div className="text-[10px] text-neutral-400 font-mono tracking-tight flex items-center gap-1 leading-none mt-0.5">
                   <span>{t('organizedWith')}</span>
-                  <span className="font-semibold text-neutral-900 tracking-tight">waltr</span>
+                  <span className="font-semibold text-neutral-900 tracking-tight">walter</span>
                   <span className="text-orange-500 font-bold text-[8px]">●</span>
                 </div>
               </div>

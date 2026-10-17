@@ -8,13 +8,13 @@ const ONBOARDING_STEPS_FR = [
     image: '/illustrations/waltr-welcome.jpg',
     fallbackVariant: 'welcome',
     badge: 'Bienvenue',
-    title: 'Rencontrez waltr',
+    title: 'Rencontrez walter',
     subtitle: 'Votre copilote intelligent WhatsApp Commerce',
     description:
-      'waltr est votre pote intelligent qui vous aide à organiser et gérer votre boutique WhatsApp au quotidien.',
+      'walter est votre pote intelligent qui vous aide à organiser et gérer votre boutique WhatsApp au quotidien.',
     bullets: [
       'Gestion simple pensée pour le commerce en Afrique',
-      'Votre boutique est au centre, waltr est là pour vous épauler',
+      'Votre boutique est au centre, walter est là pour vous épauler',
     ],
   },
   {
@@ -67,13 +67,13 @@ const ONBOARDING_STEPS_EN = [
     image: '/illustrations/waltr-welcome.jpg',
     fallbackVariant: 'welcome',
     badge: 'Welcome',
-    title: 'Meet waltr',
+    title: 'Meet walter',
     subtitle: 'Your intelligent WhatsApp Commerce buddy',
     description:
-      'waltr is your smart pal helping you organize and manage your WhatsApp boutique on a daily basis.',
+      'walter is your smart pal helping you organize and manage your WhatsApp boutique on a daily basis.',
     bullets: [
       'Simple management built for modern African retail',
-      'Your boutique comes first, waltr is here as your companion',
+      'Your boutique comes first, walter is here as your companion',
     ],
   },
   {

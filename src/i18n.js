@@ -64,7 +64,7 @@ export const TRANSLATIONS = {
     // First Login Modal
     firstLoginBadge: "Première connexion",
     setPasswordTitle: "Définissez votre mot de passe",
-    setPasswordDesc: "Votre compte boutique a été configuré par l'équipe waltr. Choisissez votre mot de passe personnel pour débloquer votre accès.",
+    setPasswordDesc: "Votre compte boutique a été configuré par l'équipe walter. Choisissez votre mot de passe personnel pour débloquer votre accès.",
     boutiqueLabel: "Boutique :",
     databaseLabel: "Base de données :",
     managerAccountLabel: "Compte gérant :",
@@ -115,7 +115,7 @@ export const TRANSLATIONS = {
     deletingBtn: "Suppression...",
 
     // Onboarding
-    onboardingSlide1Title: "Bienvenue sur waltr !",
+    onboardingSlide1Title: "Bienvenue sur walter !",
     onboardingSlide1Desc: "Votre compagnon intelligent qui vous aide à organiser et gérer votre boutique WhatsApp au quotidien.",
     onboardingSlide2Title: "Photographiez l'habit d'abord",
     onboardingSlide2Desc: "Prenez une photo de vos vêtements directement en rayon. Donnez ensuite le nom, le prix en FCFA et le stock en quelques secondes.",
@@ -130,7 +130,7 @@ export const TRANSLATIONS = {
     articleAdded: 'Article "{nom}" ajouté au catalogue !',
     articleUpdated: 'Article "{nom}" mis à jour avec photo.',
     articleDeleted: "Article supprimé de la base de données.",
-    passwordCreatedSuccess: "Mot de passe créé avec succès ! Bienvenue sur votre tableau de bord waltr.",
+    passwordCreatedSuccess: "Mot de passe créé avec succès ! Bienvenue sur votre tableau de bord walter.",
     databaseCleared: "Base de données réinitialisée. Votre catalogue est maintenant propre et vide.",
     samplesLoaded: "Exemples de test chargés dans votre base.",
     linkCopiedToast: "Lien d'accès copié dans le presse-papier !",
@@ -200,7 +200,7 @@ export const TRANSLATIONS = {
     // First Login Modal
     firstLoginBadge: "First sign-in",
     setPasswordTitle: "Set your password",
-    setPasswordDesc: "Your store account has been configured by the waltr team. Choose your personal password to unlock your dashboard access.",
+    setPasswordDesc: "Your store account has been configured by the walter team. Choose your personal password to unlock your dashboard access.",
     boutiqueLabel: "Store:",
     databaseLabel: "Database:",
     managerAccountLabel: "Manager account:",
@@ -251,7 +251,7 @@ export const TRANSLATIONS = {
     deletingBtn: "Deleting...",
 
     // Onboarding
-    onboardingSlide1Title: "Welcome to waltr!",
+    onboardingSlide1Title: "Welcome to walter!",
     onboardingSlide1Desc: "Your intelligent buddy helping you organize and run your WhatsApp boutique every single day.",
     onboardingSlide2Title: "Snap the photo first",
     onboardingSlide2Desc: "Photograph your clothes right on the rack in 1 second. Then set the name, FCFA price, and stock in seconds.",
@@ -266,7 +266,7 @@ export const TRANSLATIONS = {
     articleAdded: 'Item "{nom}" added to catalog!',
     articleUpdated: 'Item "{nom}" updated with photo.',
     articleDeleted: "Item deleted from database.",
-    passwordCreatedSuccess: "Password created successfully! Welcome to your waltr dashboard.",
+    passwordCreatedSuccess: "Password created successfully! Welcome to your walter dashboard.",
     databaseCleared: "Database reset. Your catalog is now clean and empty.",
     samplesLoaded: "Sample test items loaded into your database.",
     linkCopiedToast: "Access link copied to clipboard!",
